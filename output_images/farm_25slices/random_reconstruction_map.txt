@@ -1,0 +1,33 @@
+Mapa de reconstrucción para: farm
+Método utilizado: RANDOM
+Número total de trozos: 25
+Dimensiones: 5x5 trozos
+Generado por: RandomSolver
+--------------------------------------------------
+POSICIÓN | ARCHIVO ORIGINAL
+------------------------------
+(0,0) -> farm_slice_000.png
+(0,1) -> farm_slice_001.png
+(0,2) -> farm_slice_002.png
+(0,3) -> farm_slice_003.png
+(0,4) -> farm_slice_004.png
+(1,0) -> farm_slice_005.png
+(1,1) -> farm_slice_006.png
+(1,2) -> farm_slice_007.png
+(1,3) -> farm_slice_008.png
+(1,4) -> farm_slice_009.png
+(2,0) -> farm_slice_010.png
+(2,1) -> farm_slice_011.png
+(2,2) -> farm_slice_012.png
+(2,3) -> farm_slice_013.png
+(2,4) -> farm_slice_014.png
+(3,0) -> farm_slice_015.png
+(3,1) -> farm_slice_016.png
+(3,2) -> farm_slice_017.png
+(3,3) -> farm_slice_018.png
+(3,4) -> farm_slice_019.png
+(4,0) -> farm_slice_020.png
+(4,1) -> farm_slice_021.png
+(4,2) -> farm_slice_022.png
+(4,3) -> farm_slice_023.png
+(4,4) -> farm_slice_024.png
