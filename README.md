@@ -242,7 +242,7 @@ black *.py puzzle_reconstructor/*.py
 Made with ❤️ **Candela Dávila Moreno**
 
 ## ⚙️ Reporting Issues
-If you encounter any bugs or issues, please feel free to contact me at [candeladavila04@gmail.com](mailto:candeladavila05@gmail.com)
+If you encounter any bugs or issues, please feel free to contact me at [candeladavila05@gmail.com](mailto:candeladavila05@gmail.com)
 
 ---
 
