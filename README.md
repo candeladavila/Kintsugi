@@ -229,14 +229,8 @@ black *.py puzzle_reconstructor/*.py
 ```
 
 ## 🎯 Future Enhancements
-
-- [ ] Machine learning-based reconstruction
-- [ ] Support for irregular piece shapes
-- [ ] Web interface for browser-based usage
-- [ ] Performance optimization for large puzzles
 - [ ] Advanced piece rotation handling
-- [ ] Batch processing capabilities
-- [ ] Real-time reconstruction visualization
+- [ ] Other methods for reconstruction
 
 ## 🙏 Acknowledgments
 
