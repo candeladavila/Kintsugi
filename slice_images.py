@@ -21,8 +21,10 @@ def slice_image(image_path, num_slices, output_dir="sliced_images"):
     if sqrt_slices * sqrt_slices != num_slices:
         raise ValueError(f"El número {num_slices} no tiene raíz cuadrada exacta")
     
-    # Crear directorio de salida si no existe
-    os.makedirs(output_dir, exist_ok=True)
+    # Crear directorio de salida específico para esta imagen y número de slices
+    base_name = os.path.splitext(os.path.basename(image_path))[0]
+    specific_output_dir = os.path.join(output_dir, f"{base_name}_{num_slices}slices")
+    os.makedirs(specific_output_dir, exist_ok=True)
     
     # Abrir la imagen
     try:
@@ -42,12 +44,13 @@ def slice_image(image_path, num_slices, output_dir="sliced_images"):
     # Obtener nombre base del archivo sin extensión
     base_name = os.path.splitext(os.path.basename(image_path))[0]
     
-    # Lista para almacenar el orden de los trozos
-    slice_order = []
-    
     print(f"Dividiendo imagen {image_path} en {num_slices} partes ({sqrt_slices}x{sqrt_slices})")
+    print(f"Guardando en carpeta: {specific_output_dir}")
     print(f"Dimensiones originales: {img_width}x{img_height}")
     print(f"Dimensiones de cada trozo: {slice_width}x{slice_height}")
+    
+    # Lista para almacenar el orden de los trozos
+    slice_order = []
     
     # Dividir la imagen
     slice_index = 0
@@ -75,7 +78,7 @@ def slice_image(image_path, num_slices, output_dir="sliced_images"):
         
         # Generar nombre del archivo del trozo (usando índice aleatorio)
         slice_filename = f"{base_name}_slice_{idx:03d}.png"
-        slice_path = os.path.join(output_dir, slice_filename)
+        slice_path = os.path.join(specific_output_dir, slice_filename)
         
         # Guardar el trozo
         cv2.imwrite(slice_path, slice_img)
@@ -92,7 +95,7 @@ def slice_image(image_path, num_slices, output_dir="sliced_images"):
     
     # Generar archivo de texto con el orden correcto
     order_filename = f"{base_name}_order.txt"
-    order_path = os.path.join(output_dir, order_filename)
+    order_path = os.path.join(specific_output_dir, order_filename)
     
     with open(order_path, 'w', encoding='utf-8') as f:
         f.write(f"Información de recomposición para: {os.path.basename(image_path)}\n")
@@ -132,7 +135,7 @@ def slice_image(image_path, num_slices, output_dir="sliced_images"):
                    f"({coords['right']}, {coords['bottom']})\n")
     
     print(f"✓ Imagen dividida exitosamente en {num_slices} partes")
-    print(f"✓ Trozos guardados en: {output_dir}/")
+    print(f"✓ Trozos guardados en: {specific_output_dir}/")
     print(f"✓ Archivo de orden creado: {order_path}")
     
     return slice_order
@@ -172,7 +175,7 @@ def reconstruct_image(order_file_path, output_path="reconstructed_image.png"):
     # Crear imagen vacía para la reconstrucción (altura, ancho, canales)
     reconstructed = np.zeros((img_dimensions[1], img_dimensions[0], 3), dtype=np.uint8)
     
-    # Directorio donde están los trozos
+    # Directorio donde están los trozos (mismo directorio que el archivo de orden)
     slices_dir = os.path.dirname(order_file_path)
     
     # Leer información de los trozos
@@ -250,45 +253,45 @@ if __name__ == "__main__":
     
     import sys
     
-    if len(sys.argv) == 1:
-        print("=== CONFIGURACIÓN RÁPIDA ===")
-        print(f"Archivo configurado: {IMAGE_FILE}")
-        print(f"Número de trozos configurado: {NUM_SLICES}")
-        print(f"Directorio de salida: {OUTPUT_DIR}")
-        print("")
-        
-        usar_config = input("¿Usar la configuración predefinida? (s/n): ").strip().lower()
-        
-        if usar_config in ['s', 'si', 'sí', 'y', 'yes', '']:
-            print("Usando configuración predefinida...")
-            try:
-                slice_image(IMAGE_FILE, NUM_SLICES, OUTPUT_DIR)
-            except Exception as e:
-                print(f"Error: {e}")
-                print("\nCambia las variables IMAGE_FILE y NUM_SLICES al inicio del script.")
-        else:
-            print("\n=== MODO INTERACTIVO ===")
-            action = input("¿Qué deseas hacer? (slice/reconstruct): ").strip().lower()
-            
-            if action == 'slice':
-                image_path = input("Ruta de la imagen: ").strip()
-                num_slices = int(input("Número de trozos (debe tener raíz cuadrada exacta): "))
-                output_dir = input("Directorio de salida (presiona Enter para usar 'sliced_images'): ").strip()
-                
-                if not output_dir:
-                    output_dir = "sliced_images"
-                
-                slice_image(image_path, num_slices, output_dir)
-                
-            elif action == 'reconstruct':
-                order_path = input("Ruta del archivo de orden (.txt): ").strip()
-                output_path = input("Nombre de la imagen reconstruida (presiona Enter para 'reconstructed_image.png'): ").strip()
-                
-                if not output_path:
-                    output_path = "reconstructed_image.png"
-                
-                reconstruct_image(order_path, output_path)
-            else:
-                print("Acción no válida. Usa 'slice' o 'reconstruct'")
+    print("=== DIVISOR DE IMÁGENES ===")
+    print("Divide imágenes en trozos cuadrados para crear puzzles")
+    print("")
+    
+    # Obtener datos del usuario
+    if len(sys.argv) >= 3:
+        # Usar argumentos de línea de comandos
+        image_path = sys.argv[1]
+        try:
+            num_slices = int(sys.argv[2])
+        except ValueError:
+            print("❌ Error: El número de slices debe ser un entero")
+            sys.exit(1)
     else:
-        main()
+        # Modo interactivo simplificado
+        image_path = input("Ruta de la imagen: ").strip()
+        if not image_path:
+            image_path = IMAGE_FILE
+            
+        try:
+            num_input = input(f"Número de trozos (Enter para {NUM_SLICES}): ").strip()
+            if num_input:
+                num_slices = int(num_input)
+            else:
+                num_slices = NUM_SLICES
+        except ValueError:
+            print(f"Valor inválido, usando {NUM_SLICES}")
+            num_slices = NUM_SLICES
+    
+    print(f"\n🎯 Configuración:")
+    print(f"   Imagen: {image_path}")
+    print(f"   Trozos: {num_slices}")
+    print(f"   Carpeta de salida: {OUTPUT_DIR}")
+    
+    try:
+        slice_image(image_path, num_slices, OUTPUT_DIR)
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+        print("\n💡 Sugerencias:")
+        print("   • Verifica que el archivo de imagen existe")
+        print("   • Asegúrate de que el número de trozos tenga raíz cuadrada exacta (4, 9, 16, 25, etc.)")
+        sys.exit(1)

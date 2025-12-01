@@ -1,0 +1,33 @@
+Mapa de reconstrucción para: platano
+Método utilizado: GRADIENT
+Número total de trozos: 25
+Dimensiones: 5x5 trozos
+Generado por: GradientSolver
+--------------------------------------------------
+POSICIÓN | ARCHIVO ORIGINAL
+------------------------------
+(0,0) -> platano_slice_024.png
+(0,1) -> platano_slice_006.png
+(0,2) -> platano_slice_004.png
+(0,3) -> platano_slice_021.png
+(0,4) -> platano_slice_009.png
+(1,0) -> platano_slice_017.png
+(1,1) -> platano_slice_023.png
+(1,2) -> platano_slice_000.png
+(1,3) -> platano_slice_014.png
+(1,4) -> platano_slice_005.png
+(2,0) -> platano_slice_010.png
+(2,1) -> platano_slice_011.png
+(2,2) -> platano_slice_002.png
+(2,3) -> platano_slice_016.png
+(2,4) -> platano_slice_020.png
+(3,0) -> platano_slice_019.png
+(3,1) -> platano_slice_001.png
+(3,2) -> platano_slice_007.png
+(3,3) -> platano_slice_008.png
+(3,4) -> platano_slice_018.png
+(4,0) -> platano_slice_012.png
+(4,1) -> platano_slice_022.png
+(4,2) -> platano_slice_015.png
+(4,3) -> platano_slice_003.png
+(4,4) -> platano_slice_013.png

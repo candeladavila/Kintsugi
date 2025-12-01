@@ -1,0 +1,91 @@
+Información de recomposición para: farm.png
+Imagen original: 2048x2048
+División: 5x5 (25 trozos)
+Tamaño de cada trozo: 409x409
+NOTA: Los trozos fueron guardados en ORDEN ALEATORIO
+--------------------------------------------------
+
+ORDEN CORRECTO PARA RECOMPOSICIÓN:
+Pos.Orig | Archivo Guardado    | Fila | Col | Índice Guardado
+-----------------------------------------------------------------
+       0 | farm_slice_008.png |    0 |   0 |              8
+       1 | farm_slice_011.png |    0 |   1 |             11
+       2 | farm_slice_016.png |    0 |   2 |             16
+       3 | farm_slice_020.png |    0 |   3 |             20
+       4 | farm_slice_010.png |    0 |   4 |             10
+       5 | farm_slice_012.png |    1 |   0 |             12
+       6 | farm_slice_024.png |    1 |   1 |             24
+       7 | farm_slice_007.png |    1 |   2 |              7
+       8 | farm_slice_002.png |    1 |   3 |              2
+       9 | farm_slice_014.png |    1 |   4 |             14
+      10 | farm_slice_004.png |    2 |   0 |              4
+      11 | farm_slice_015.png |    2 |   1 |             15
+      12 | farm_slice_005.png |    2 |   2 |              5
+      13 | farm_slice_006.png |    2 |   3 |              6
+      14 | farm_slice_017.png |    2 |   4 |             17
+      15 | farm_slice_022.png |    3 |   0 |             22
+      16 | farm_slice_023.png |    3 |   1 |             23
+      17 | farm_slice_013.png |    3 |   2 |             13
+      18 | farm_slice_000.png |    3 |   3 |              0
+      19 | farm_slice_019.png |    3 |   4 |             19
+      20 | farm_slice_003.png |    4 |   0 |              3
+      21 | farm_slice_018.png |    4 |   1 |             18
+      22 | farm_slice_009.png |    4 |   2 |              9
+      23 | farm_slice_001.png |    4 |   3 |              1
+      24 | farm_slice_021.png |    4 |   4 |             21
+
+--------------------------------------------------
+MAPEO DE ARCHIVOS (Archivo -> Posición Original):
+farm_slice_000.png -> Posición original 18 (Fila 3, Col 3)
+farm_slice_001.png -> Posición original 23 (Fila 4, Col 3)
+farm_slice_002.png -> Posición original 8 (Fila 1, Col 3)
+farm_slice_003.png -> Posición original 20 (Fila 4, Col 0)
+farm_slice_004.png -> Posición original 10 (Fila 2, Col 0)
+farm_slice_005.png -> Posición original 12 (Fila 2, Col 2)
+farm_slice_006.png -> Posición original 13 (Fila 2, Col 3)
+farm_slice_007.png -> Posición original 7 (Fila 1, Col 2)
+farm_slice_008.png -> Posición original 0 (Fila 0, Col 0)
+farm_slice_009.png -> Posición original 22 (Fila 4, Col 2)
+farm_slice_010.png -> Posición original 4 (Fila 0, Col 4)
+farm_slice_011.png -> Posición original 1 (Fila 0, Col 1)
+farm_slice_012.png -> Posición original 5 (Fila 1, Col 0)
+farm_slice_013.png -> Posición original 17 (Fila 3, Col 2)
+farm_slice_014.png -> Posición original 9 (Fila 1, Col 4)
+farm_slice_015.png -> Posición original 11 (Fila 2, Col 1)
+farm_slice_016.png -> Posición original 2 (Fila 0, Col 2)
+farm_slice_017.png -> Posición original 14 (Fila 2, Col 4)
+farm_slice_018.png -> Posición original 21 (Fila 4, Col 1)
+farm_slice_019.png -> Posición original 19 (Fila 3, Col 4)
+farm_slice_020.png -> Posición original 3 (Fila 0, Col 3)
+farm_slice_021.png -> Posición original 24 (Fila 4, Col 4)
+farm_slice_022.png -> Posición original 15 (Fila 3, Col 0)
+farm_slice_023.png -> Posición original 16 (Fila 3, Col 1)
+farm_slice_024.png -> Posición original 6 (Fila 1, Col 1)
+
+--------------------------------------------------
+COORDENADAS ORIGINALES:
+farm_slice_008.png: (0, 0) -> (409, 409)
+farm_slice_011.png: (409, 0) -> (818, 409)
+farm_slice_016.png: (818, 0) -> (1227, 409)
+farm_slice_020.png: (1227, 0) -> (1636, 409)
+farm_slice_010.png: (1636, 0) -> (2045, 409)
+farm_slice_012.png: (0, 409) -> (409, 818)
+farm_slice_024.png: (409, 409) -> (818, 818)
+farm_slice_007.png: (818, 409) -> (1227, 818)
+farm_slice_002.png: (1227, 409) -> (1636, 818)
+farm_slice_014.png: (1636, 409) -> (2045, 818)
+farm_slice_004.png: (0, 818) -> (409, 1227)
+farm_slice_015.png: (409, 818) -> (818, 1227)
+farm_slice_005.png: (818, 818) -> (1227, 1227)
+farm_slice_006.png: (1227, 818) -> (1636, 1227)
+farm_slice_017.png: (1636, 818) -> (2045, 1227)
+farm_slice_022.png: (0, 1227) -> (409, 1636)
+farm_slice_023.png: (409, 1227) -> (818, 1636)
+farm_slice_013.png: (818, 1227) -> (1227, 1636)
+farm_slice_000.png: (1227, 1227) -> (1636, 1636)
+farm_slice_019.png: (1636, 1227) -> (2045, 1636)
+farm_slice_003.png: (0, 1636) -> (409, 2045)
+farm_slice_018.png: (409, 1636) -> (818, 2045)
+farm_slice_009.png: (818, 1636) -> (1227, 2045)
+farm_slice_001.png: (1227, 1636) -> (1636, 2045)
+farm_slice_021.png: (1636, 1636) -> (2045, 2045)
