@@ -238,6 +238,12 @@ black *.py puzzle_reconstructor/*.py
 - Built with OpenCV for robust image processing
 - Uses NumPy for efficient numerical computations
 
+## 👩🏻‍💻 Author
+Made with ❤️ **Candela Dávila Moreno**
+
+## ⚙️ Reporting Issues
+If you encounter any bugs or issues, please feel free to contact me at [candeladavila04@gmail.com](mailto:candeladavila05@gmail.com)
+
 ---
 
 *"In the Japanese art of Kintsugi, broken pottery is repaired with gold, making the repaired piece more beautiful than the original. Similarly, this project finds beauty in the reconstruction of fragmented images."* ✨
