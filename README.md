@@ -230,11 +230,10 @@ black *.py puzzle_reconstructor/*.py
 
 ## 🎯 Future Enhancements
 - [ ] Advanced piece rotation handling
-- [ ] Other methods for reconstruction
-    - [ ]MGC (Mahalanobis Gradient Covariance): Jigsaw Puzzles with Pieces of Unknown Orientation" (Gallagher & Chen, CVPR 2012)
+- [ ] Other methods for reconstruction:
+    - [ ] MGC (Mahalanobis Gradient Covariance): "Jigsaw Puzzles with Pieces of Unknown Orientation" (Gallagher & Chen, CVPR 2012)
     - [ ] Best Buddies: "Solving Multiple Square Jigsaw Puzzles with Missing Pieces" (Paikin & Tal, CVPR 2015)
     - [ ] Minimum Spanning Tree (MST)
-    - [ ]
 
 ## 🙏 Acknowledgments
 
