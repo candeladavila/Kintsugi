@@ -215,14 +215,6 @@ done
 - Verify sufficient disk space for output files
 - Ensure Python 3.6+ compatibility
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Commit changes: `git commit -am 'Add feature'`
-4. Push to branch: `git push origin feature-name`
-5. Submit a Pull Request
-
 ### Development Setup
 
 ```bash
@@ -235,10 +227,6 @@ pytest tests/
 # Format code
 black *.py puzzle_reconstructor/*.py
 ```
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
 
 ## 🎯 Future Enhancements
 
@@ -255,10 +243,6 @@ This project is open source and available under the [MIT License](LICENSE).
 - Inspired by traditional jigsaw puzzles and the Japanese art of Kintsugi
 - Built with OpenCV for robust image processing
 - Uses NumPy for efficient numerical computations
-
-## 📞 Contact
-
-For questions, suggestions, or contributions, please open an issue on GitHub or contact the project maintainer.
 
 ---
 
