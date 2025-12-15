@@ -1,279 +1,465 @@
 #!/usr/bin/env python3
 """
-KINTSUGI - Sistema completo de división y reconstrucción de puzzles de imágenes
-Combina la funcionalidad de slice_images.py y puzzle_solver.py en un flujo automático
+KINTSUGI - Complete system for image puzzle slicing and reconstruction
+
+VERSION 1 (V1): Standard puzzle - pieces are shuffled but not rotated
+VERSION 2 (V2): Advanced puzzle - pieces are shuffled AND randomly rotated (0°, 90°, 180°, 270°)
+
+Combines the functionality of slice_images.py and puzzle_solver.py in an automatic workflow
 """
 
 import os
 import sys
-import subprocess
-import glob
+import math
 from pathlib import Path
 
-def run_slice_images(image_path, num_slices):
+
+# =============================================================================
+#   VERSION SELECTION
+# =============================================================================
+
+def select_version():
     """
-    Ejecuta slice_images.py con los parámetros especificados
+    Asks the user to select which version of the system to use.
+    
+    Returns:
+        int: 1 for V1 (no rotation), 2 for V2 (with rotation), 3 for both
     """
-    print("🔪 Iniciando división de imagen...")
+    print("\n" + "=" * 60)
+    print("SELECT PUZZLE VERSION")
+    print("=" * 60)
+    print("")
+    print("  VERSION 1 (V1): Standard Puzzle")
+    print("    - Pieces are randomly shuffled")
+    print("    - No rotation applied")
+    print("")
+    print("  VERSION 2 (V2): Advanced Puzzle with Rotation")
+    print("    - Pieces are randomly shuffled")
+    print("    - Each piece rotated 0°, 90°, 180° or 270°")
+    print("")
+    print("  BOTH VERSIONS: Execute V1 and V2 simultaneously")
+    print("    - Generates two puzzle sets for comparison")
+    print("    - Separate results in ver_1/ and ver_2/")
+    print("")
+    
+    while True:
+        choice = input("Select version (1, 2 or 3 for both): ").strip()
+        if choice == '1':
+            print("Selected: VERSION 1 (Standard)")
+            return 1
+        elif choice == '2':
+            print("Selected: VERSION 2 (With Rotation)")
+            return 2
+        elif choice == '3':
+            print("Selected: BOTH VERSIONS (V1 + V2)")
+            return 3
+        else:
+            print("Please enter 1, 2 or 3")
+
+
+# =============================================================================
+#   V1 FUNCTIONS (No Rotation) - Original
+# =============================================================================
+
+def run_slice_images_v1(image_path, num_slices):
+    """
+    Executes slice_images.py with the specified parameters (V1 - no rotation)
+    """
+    print("🔪 Starting image slicing (V1 - No Rotation)...")
     print("-" * 40)
     
     try:
-        # Ejecutar slice_images.py con argumentos
-        cmd = [sys.executable, "slice_images.py", image_path, str(num_slices)]
-        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
-        
-        print(result.stdout)
-        if result.stderr:
-            print("Advertencias:", result.stderr)
-        
-        print("✅ División completada exitosamente")
+        # Import and execute directly instead of subprocess
+        import slice_images
+        slice_images.slice_image(image_path, num_slices, "sliced_images")
         return True
         
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Error durante la división: {e}")
-        if e.stdout:
-            print("Salida:", e.stdout)
-        if e.stderr:
-            print("Error:", e.stderr)
-        return False
-    except FileNotFoundError:
-        print("❌ Error: No se encontró slice_images.py")
+    except Exception as e:
+        print(f"Error during slicing: {e}")
         return False
 
-def run_puzzle_solver(image_name, num_slices, method='all'):
+def run_puzzle_solver_v1(image_name, num_slices, method='all'):
     """
-    Ejecuta puzzle_solver.py con la configuración especificada
+    Executes puzzle_solver.py with the specified configuration (V1 - no rotation)
     """
-    print(f"\n🧩 Iniciando reconstrucción de puzzle...")
-    print("-" * 40)
     
     try:
-        # Buscar la carpeta específica creada por slice_images
+        # Find the specific folder created by slice_images
         sliced_dir = f"sliced_images/{image_name}_{num_slices}slices"
         if not os.path.exists(sliced_dir):
-            print(f"❌ Error: No se encontró la carpeta {sliced_dir}")
+            print(f"Error: Folder not found {sliced_dir}")
             return False
         
-        # Crear manualmente los solvers con las rutas correctas
-        print(f"📂 Usando carpeta de trozos: {sliced_dir}")
+        # Manually create solvers with correct paths
+        print(f"📂 Using pieces folder: {sliced_dir}")
         
-        # Importar los módulos necesarios
+        # Import required modules
         sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'puzzle_reconstructor'))
         from gradient_reconstructor import GradientSolver
         from color_reconstructor import ColorSolver
         from random_reconstructor import RandomSolver
+        from paikin_reconstructor import PaikinSolver
         
-        output_dir = "output_images"
+        output_dir = "output_images/ver_1"
         
-        # Ejecutar métodos según la selección
+        # Execute methods according to selection
         if method == 'all':
             methods_to_run = [
+                ('paikin', PaikinSolver),
                 ('gradient', GradientSolver),
                 ('color', ColorSolver),
                 ('random', RandomSolver)
             ]
         else:
             solver_map = {
+                'paikin': PaikinSolver,
                 'gradient': GradientSolver,
                 'color': ColorSolver,
                 'random': RandomSolver
             }
             if method not in solver_map:
-                print(f"❌ Error: Método desconocido '{method}'")
+                print(f"Error: Unknown method '{method}'")
                 return False
             methods_to_run = [(method, solver_map[method])]
         
         success_count = 0
         for method_name, solver_class in methods_to_run:
             try:
-                print(f"\n🔄 Ejecutando método: {method_name.upper()}")
+                print(f"\nExecuting method: {method_name.upper()}")
                 solver = solver_class(sliced_dir, output_dir, image_name)
                 solver.load_slices(image_name)
                 solver.solve()
                 success_count += 1
             except Exception as e:
-                print(f"❌ Error en método {method_name}: {e}")
+                print(f"Error in method {method_name}: {e}")
         
         if success_count > 0:
-            print(f"\n✅ Reconstrucción completada: {success_count} métodos exitosos")
+            print(f"\nReconstruction completed")
             return True
         else:
-            print("❌ Todos los métodos fallaron")
+            print("All methods failed")
             return False
         
     except ImportError as e:
-        print(f"❌ Error de importación: {e}")
-        print("Verificar que los módulos puzzle_reconstructor están disponibles")
+        print(f"Import error: {e}")
+        print("Verify that puzzle_reconstructor modules are available")
         return False
     except Exception as e:
-        print(f"❌ Error durante la reconstrucción: {e}")
+        print(f"Error during reconstruction: {e}")
         return False
 
+# =============================================================================
+#   V2 FUNCTIONS (With Rotation)
+# =============================================================================
+
+def run_slice_images_v2(image_path, num_slices):
+    """
+    Slices image using V2 method (with random rotation).
+    """
+    
+    try:
+        import slice_images_v2
+        slice_images_v2.slice_image_v2(image_path, num_slices, "sliced_images")
+        return True
+    except Exception as e:
+        print(f"Error during slicing: {e}")
+        return False
+
+
+def run_puzzle_solver_v2(image_name, num_slices, method='all'):
+    """
+    Reconstructs puzzle using V2 solvers (with rotation support).
+    """
+    
+    try:
+        sliced_dir = f"sliced_images/{image_name}_{num_slices}slices"
+        if not os.path.exists(sliced_dir):
+            print(f"Error: No se encontró la carpeta {sliced_dir}")
+            return False
+        
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'puzzle_reconstructor_v2'))
+        from gradient_reconstructor_v2 import GradientSolverV2
+        from color_reconstructor_v2 import ColorSolverV2
+        from random_reconstructor_v2 import RandomSolverV2
+        from paikin_reconstructor_v2 import PaikinSolverV2
+        
+        output_dir = "output_images/ver_2"
+        
+        if method == 'all':
+            methods_to_run = [
+                ('paikin', PaikinSolverV2),
+                ('gradient', GradientSolverV2),
+                ('color', ColorSolverV2),
+                ('random', RandomSolverV2)
+            ]
+        else:
+            solver_map = {
+                'paikin': PaikinSolverV2,
+                'gradient': GradientSolverV2,
+                'color': ColorSolverV2,
+                'random': RandomSolverV2
+            }
+            if method not in solver_map:
+                print(f"Error: Unknown method '{method}'")
+                return False
+            methods_to_run = [(method, solver_map[method])]
+        
+        success_count = 0
+        for method_name, solver_class in methods_to_run:
+            try:
+                solver = solver_class(sliced_dir, output_dir, image_name)
+                solver.load_slices(image_name)
+                solver.solve()
+                success_count += 1
+            except Exception as e:
+                print(f"Error in method {method_name}: {e}")
+                import traceback
+                traceback.print_exc()
+        
+        if success_count > 0:
+            return True
+        else:
+            print("All methods failed")
+            return False
+        
+    except ImportError as e:
+        print(f"Import error: {e}")
+        print("Verify that puzzle_reconstructor_v2 is available")
+        return False
+    except Exception as e:
+        print(f"Error during reconstruction: {e}")
+        return False
+
+
+# =============================================================================
+#   UTILITY FUNCTIONS
+# =============================================================================
+
 def get_image_name(image_path):
-    """Extrae el nombre base de la imagen sin extensión"""
+    """Extracts the base name of the image without extension"""
     return Path(image_path).stem
 
 def validate_image_exists(image_path):
-    """Valida que el archivo de imagen exista"""
+    """Validates that the image file exists"""
     if not os.path.exists(image_path):
-        print(f"❌ Error: No se encontró el archivo {image_path}")
+        print(f"Error: File not found {image_path}")
         return False
     
-    # Verificar que sea un archivo de imagen válido
+    # Verify that it's a valid image file
     valid_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp']
     ext = Path(image_path).suffix.lower()
     
     if ext not in valid_extensions:
-        print(f"❌ Error: {ext} no es un formato de imagen soportado")
-        print(f"Formatos válidos: {', '.join(valid_extensions)}")
+        print(f"Error: {ext} is not a supported image format")
+        print(f"Valid formats: {', '.join(valid_extensions)}")
         return False
     
     return True
 
 def validate_num_slices(num_slices):
-    """Valida que el número de slices tenga raíz cuadrada exacta"""
+    """Validates that the number of slices has an exact square root"""
     import math
     sqrt_slices = int(math.sqrt(num_slices))
     if sqrt_slices * sqrt_slices != num_slices:
-        print(f"❌ Error: {num_slices} no tiene raíz cuadrada exacta")
-        print(f"Números válidos: 4, 9, 16, 25, 36, 49, 64, 81, 100, etc.")
+        print(f"Error: {num_slices} does not have an exact square root")
+        print(f"Valid numbers: 4, 9, 16, 25, 36, 49, 64, 81, 100, etc.")
         return False
     return True
 
-def interactive_mode():
-    """Modo interactivo para obtener parámetros del usuario"""
-    print("🖼️  KINTSUGI - SISTEMA DE PUZZLES DE IMÁGENES")
-    print("=" * 50)
-    print("Divide una imagen en trozos y luego intenta reconstruirla automáticamente")
+def interactive_mode(version=1):
+    """Interactive mode to get parameters from user"""
+    if version == 3:
+        version_str = "BOTH (V1 + V2)"
+    else:
+        version_str = "V1 (Standard)" if version == 1 else "V2 (With Rotation)"
+    print(f"KINTSUGI - IMAGE PUZZLE SYSTEM - {version_str}")
+    print("=" * 60)
+    print("Splits an image into pieces and attempts automatic reconstruction")
     print("")
     
-    # Obtener ruta de imagen
+    # Get image path (without listing)
     while True:
-        image_path = input("📁 Ruta de la imagen: ").strip()
-        if not image_path:
-            print("❌ Por favor, introduce una ruta válida")
+        image_input = input("Image path: ").strip()
+        if not image_input:
+            print("Please enter a valid path")
             continue
+        
+        image_path = image_input
         
         if validate_image_exists(image_path):
             break
     
-    # Obtener número de slices
+    # Get number of slices
     while True:
         try:
-            num_input = input("🔢 Número de trozos (4, 9, 16, 25, etc.): ").strip()
+            num_input = input("Number of pieces (4, 9, 16, 25, etc.): ").strip()
             num_slices = int(num_input)
             
             if validate_num_slices(num_slices):
                 break
         except ValueError:
-            print("❌ Por favor, introduce un número entero válido")
+            print("Please enter a valid square integer")
     
-    # Seleccionar método de reconstrucción
+    # Select reconstruction method
     methods = {
-        '1': ('gradient', 'Análisis de gradientes'),
-        '2': ('color', 'Análisis de colores'),
-        '3': ('random', 'Orden aleatorio'),
-        '4': ('all', 'Todos los métodos')
+        '1': ('paikin', 'Paikin (Best Buddies)'),
+        '2': ('gradient', 'Gradient Analysis'),
+        '3': ('color', 'Color Analysis'),
+        '4': ('random', 'Random Order'),
+        '5': ('all', 'All Methods')
     }
     
-    print("\n🔧 Métodos de reconstrucción:")
+    print("\nReconstruction methods:")
     for key, (method, desc) in methods.items():
         print(f"  {key}. {method.upper()} - {desc}")
     
     while True:
-        choice = input("\n🎯 Selecciona método (1-4, Enter para todos): ").strip()
+        choice = input("\nSelect method (1-5, Enter for all): ").strip()
         
-        if not choice:  # Enter presionado
+        if not choice:  # Enter pressed
             method = 'all'
             break
         elif choice in methods:
             method = methods[choice][0]
             break
         else:
-            print("❌ Por favor, selecciona una opción válida (1-4)")
+            print("Please select a valid option (1-5)")
     
     return image_path, num_slices, method
 
 def main():
-    """Función principal"""
+    """Main function"""
     print()
+    print("=" * 60)
+    print("KINTSUGI - Image Puzzle System")
+    print("=" * 60)
     
-    # Verificar que los scripts necesarios existen
-    required_files = ['slice_images.py', 'puzzle_solver.py']
-    for file in required_files:
-        if not os.path.exists(file):
-            print(f"❌ Error: No se encontró {file}")
-            print("Asegúrate de ejecutar este script desde el directorio correcto")
-            return
+    # Step 0: Select version FIRST
+    version = select_version()
     
-    # Procesar argumentos de línea de comandos
+    # Process command line arguments
     if len(sys.argv) >= 3:
-        # Modo línea de comandos
+        # Command line mode
         image_path = sys.argv[1]
         try:
             num_slices = int(sys.argv[2])
         except ValueError:
-            print("❌ Error: El número de slices debe ser un entero")
+            print("Error: Number of slices must be an integer")
             return
         
         method = sys.argv[3] if len(sys.argv) > 3 else 'all'
         
-        # Validaciones
+        # Validations
         if not validate_image_exists(image_path):
             return
         if not validate_num_slices(num_slices):
             return
         
     else:
-        # Modo interactivo
-        image_path, num_slices, method = interactive_mode()
+        # Interactive mode - pass version for display
+        image_path, num_slices, method = interactive_mode(version)
     
-    # Obtener nombre base de la imagen
+    # Get base image name
     image_name = get_image_name(image_path)
     
-    print(f"\n🎯 Configuración:")
-    print(f"   Imagen: {image_path}")
-    print(f"   Nombre base: {image_name}")
-    print(f"   Trozos: {num_slices}")
-    print(f"   Método: {method.upper()}")
+    if version == 3:
+        version_str = "BOTH (V1 + V2)"
+        output_folder = "output_images/ver_1 and output_images/ver_2"
+    else:
+        version_str = "V1 (Standard)" if version == 1 else "V2 (With Rotation)"
+        output_folder = "output_images/ver_1" if version == 1 else "output_images/ver_2"
+    
+    sliced_folder = "sliced_images"
+    
+    print(f"\nConfiguration:")
+    print(f"   Version: {version_str}")
+    print(f"   Image: {image_path}")
+    print(f"   Base name: {image_name}")
+    print(f"   Pieces: {num_slices}")
+    print(f"   Method: {method.upper()}")
     print("")
     
-    # Confirmar antes de proceder
-    if len(sys.argv) < 3:  # Solo en modo interactivo
-        confirm = input("¿Continuar? (Enter para sí, 'n' para no): ").strip().lower()
+    # Confirm before proceeding
+    if len(sys.argv) < 3:  # Only in interactive mode
+        confirm = input("Continue? (Enter for yes, 'n' for no): ").strip().lower()
         if confirm == 'n':
-            print("🚫 Operación cancelada")
+            print("Operation cancelled")
             return
     
-    print("\n" + "=" * 60)
-    print("🚀 INICIANDO PROCESO COMPLETO")
-    print("=" * 60)
-    
-    # Paso 1: Dividir imagen
-    success = run_slice_images(image_path, num_slices)
-    if not success:
-        print("\n💥 Falló la división de imagen. Proceso terminado.")
+    # Execute according to version
+    if version == 1:
+        # V1: Standard (no rotation)
+        success = run_slice_images_v1(image_path, num_slices)
+        if not success:
+            print("\nImage slicing failed. Process terminated.")
+            return
+        
+        success = run_puzzle_solver_v1(image_name, num_slices, method)
+        if not success:
+            print("\nPuzzle reconstruction failed.")
+            return
+            
+    elif version == 2:
+        # V2: With rotation
+        success = run_slice_images_v2(image_path, num_slices)
+        if not success:
+            print("\nImage slicing failed. Process terminated.")
+            return
+        
+        success = run_puzzle_solver_v2(image_name, num_slices, method)
+        if not success:
+            print("\nPuzzle reconstruction failed.")
+            return
+            
+    else:  # version == 3: Both versions
+        print("\n" + "=" * 60)
+        print("PART 1/2: EXECUTING VERSION 1 (Standard)")
+        print("=" * 60)
+        
+        success_v1 = run_slice_images_v1(image_path, num_slices)
+        if success_v1:
+            success_v1 = run_puzzle_solver_v1(image_name, num_slices, method)
+        
+        print("\n" + "=" * 60)
+        print("PART 2/2: EXECUTING VERSION 2 (With Rotation)")
+        print("=" * 60)
+        
+        success_v2 = run_slice_images_v2(image_path, num_slices)
+        if success_v2:
+            success_v2 = run_puzzle_solver_v2(image_name, num_slices, method)
+        
+        # Summary for both versions
+        print("\n" + "=" * 60)
+        if success_v1 and success_v2:
+            print("BOTH VERSIONS COMPLETED SUCCESSFULLY")
+        elif success_v1:
+            print("COMPLETED WITH WARNINGS - Only V1 successful")
+        elif success_v2:
+            print("COMPLETED WITH WARNINGS - Only V2 successful")
+        else:
+            print("BOTH VERSIONS FAILED")
+            return
+        print("=" * 60)
+        print(f"Pieces saved in: {sliced_folder}/{image_name}_{num_slices}slices/")
+        print(f"V1 results: output_images/ver_1/{image_name}_{num_slices}slices/")
+        print(f"V2 results: output_images/ver_2/{image_name}_{num_slices}slices/")
         return
     
-    # Paso 2: Reconstruir puzzle
-    success = run_puzzle_solver(image_name, num_slices, method)
-    if not success:
-        print("\n💥 Falló la reconstrucción del puzzle.")
-        return
-    
-    # Resumen final
+    # Final summary (for single version execution)
     print("\n" + "=" * 60)
-    print("🎉 PROCESO COMPLETADO EXITOSAMENTE")
+    print("PROCESS COMPLETED SUCCESSFULLY")
     print("=" * 60)
-    print(f"📁 Trozos guardados en: sliced_images/{image_name}_{num_slices}slices/")
-    print(f"🎨 Resultados en: output_images/{image_name}_{num_slices}slices/")
-    print("\n✨ ¡Revisa los resultados y compara los diferentes métodos!")
+    print(f"Pieces saved in: {sliced_folder}/{image_name}_{num_slices}slices/")
+    print(f"Results in: {output_folder}/{image_name}_{num_slices}slices/")
+    if version == 2:
+        print("Note: V2 includes rotation accuracy metrics")
+    print("\nCheck the results and compare the different methods!")
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n⚠️  Operación cancelada por el usuario")
+        print("\n\nOperation cancelled by user")
     except Exception as e:
-        print(f"\n💥 Error inesperado: {e}")
+        print(f"\nUnexpected error: {e}")
         sys.exit(1)

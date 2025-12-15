@@ -4,12 +4,18 @@ An intelligent image puzzle system that divides images into randomized pieces an
 
 ## 🌟 Features
 
+- **Two Puzzle Versions**:
+  - **V1 (Standard)**: Pieces are shuffled but not rotated - easier to solve
+  - **V2 (Advanced)**: Pieces are shuffled AND randomly rotated (0°, 90°, 180°, 270°) - more challenging
+  - **Dual Execution**: Run both versions simultaneously to compare complexity
 - **Image Slicing**: Automatically divide any image into square puzzle pieces with randomized arrangement
 - **Multiple Reconstruction Algorithms**: 
+  - **Paikin Solver (Best Buddies)**: Advanced algorithm using best-first search with multi-channel edge compatibility (LAB color + gradient)
   - **Gradient Analysis**: Uses edge detection and gradient matching for intelligent piece placement
   - **Color Analysis**: Employs LAB color space for perceptually accurate edge matching
   - **Random Assembly**: Baseline comparison using random piece arrangement
-- **Organized Output**: Structured file organization by image name and slice count
+- **Configurable Border Width**: Adjust analysis width (10-100 pixels) for optimal matching
+- **Organized Output**: Structured file organization by version, image name and slice count
 - **Interactive & CLI Modes**: Both user-friendly interactive mode and command-line interface
 - **Comprehensive Validation**: Input validation and error handling throughout the pipeline
 
@@ -27,6 +33,10 @@ pip install opencv-python numpy
 1. **Interactive Mode** (Recommended for beginners):
 ```bash
 python main.py
+# Then select:
+# 1 = V1 (standard puzzle, no rotation)
+# 2 = V2 (advanced puzzle with rotation)
+# 3 = Both versions (compare V1 vs V2)
 ```
 
 2. **Command Line Mode**:
@@ -39,6 +49,12 @@ python main.py path/to/image.jpg 16 gradient
 python main.py path/to/image.jpg 16 all
 ```
 
+4. **Execute both V1 and V2 versions**:
+```bash
+python main.py
+# Select option 3 to run both versions and compare results
+```
+
 ### Example
 
 ```bash
@@ -49,6 +65,37 @@ python main.py images/example.jpg 16 all
 # - sliced_images/example_16slices/ (puzzle pieces)
 # - output_images/example_16slices/ (reconstructed images)
 ```
+
+### Advanced: Configurable Border Width
+
+You can adjust the border analysis width (default: 10 pixels) for fine-tuning algorithm performance:
+
+```python
+from puzzle_reconstructor.color_reconstructor import ColorSolver
+
+# Default border width (10 pixels)
+solver = ColorSolver("sliced_images/example_16slices", 
+                     "output_images", 
+                     "example")
+
+# Custom border width (30 pixels for more context)
+solver = ColorSolver("sliced_images/example_16slices", 
+                     "output_images", 
+                     "example",
+                     border_width=30)
+
+# Larger border for high-resolution puzzles (100 pixels)
+solver = ColorSolver("sliced_images/example_16slices", 
+                     "output_images", 
+                     "example",
+                     border_width=100)
+```
+
+**Border Width Guidelines:**
+- **10-30px**: Recommended for standard puzzles (piece size 100-300px)
+- **30-50px**: Better for noisy images or subtle gradients
+- **50-100px**: Use for high-resolution pieces (>500px) or when edges are ambiguous
+- **Avoid**: Border width > 50% of piece size (includes too much interior texture)
 
 ## 📁 Project Structure
 
@@ -229,10 +276,10 @@ black *.py puzzle_reconstructor/*.py
 ```
 
 ## 🎯 Future Enhancements
+
 - [ ] Advanced piece rotation handling
 - [ ] Other methods for reconstruction:
     - [ ] MGC (Mahalanobis Gradient Covariance): "Jigsaw Puzzles with Pieces of Unknown Orientation" (Gallagher & Chen, CVPR 2012)
-    - [ ] Best Buddies: "Solving Multiple Square Jigsaw Puzzles with Missing Pieces" (Paikin & Tal, CVPR 2015)
     - [ ] Minimum Spanning Tree (MST)
 
 ## 🙏 Acknowledgments

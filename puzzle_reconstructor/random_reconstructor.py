@@ -8,8 +8,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 from puzzle_base import PuzzleSolverBase
 
 class RandomSolver(PuzzleSolverBase):
-    def __init__(self, sliced_dir: str, output_dir: str, image_name: str = ""):
-        super().__init__(sliced_dir, output_dir, image_name)
+    def __init__(self, sliced_dir: str, output_dir: str, image_name: str = "", border_width: int = 10):
+        super().__init__(sliced_dir, output_dir, image_name, border_width)
     
     def solve(self):
         """
@@ -39,7 +39,7 @@ class RandomSolver(PuzzleSolverBase):
 if __name__ == "__main__":
     import sys
     
-    # Usar argumento de línea de comandos o pedir al usuario
+    # Use command line argument or ask user
     if len(sys.argv) > 1:
         NOMBRE_BASE = sys.argv[1]
     else:

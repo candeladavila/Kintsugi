@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'puzzle_reconstructor
 from gradient_reconstructor import GradientSolver
 from color_reconstructor import ColorSolver
 from random_reconstructor import RandomSolver
-
+from paikin_reconstructor import PaikinSolver
 
 def find_available_images(sliced_dir="sliced_images"):
     """
@@ -118,8 +118,9 @@ def get_user_choice():
     methods = {
         '1': ('gradient', 'Análisis de gradientes (detecta bordes y líneas)'),
         '2': ('color', 'Análisis de colores (continuidad cromática)'),
-        '3': ('random', 'Orden aleatorio (sin análisis)'),
-        '4': ('all', 'Ejecutar todos los métodos')
+        '3': ('paikin', 'Método Paikin (Best-First + Multicanal) [RECOMENDADO]'), # <--- NUEVO
+        '4': ('random', 'Orden aleatorio (sin análisis)'),
+        '5': ('all', 'Ejecutar todos los métodos')
     }
     
     print("\n🔧 Métodos de reconstrucción disponibles:")
@@ -152,6 +153,8 @@ def run_solver(image_name, method, slices_path, output_dir):
             solver = ColorSolver(slices_path, output_dir, image_name)
         elif method == 'random':
             solver = RandomSolver(slices_path, output_dir, image_name)
+        elif method == 'paikin':
+            solver = PaikinSolver(slices_path, output_dir, image_name)
         else:
             raise ValueError(f"Método desconocido: {method}")
         

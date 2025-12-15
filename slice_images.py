@@ -8,20 +8,20 @@ import random
 
 def slice_image(image_path, num_slices, output_dir="sliced_images"):
     """
-    Divide una imagen en num_slices partes cuadradas y genera un archivo de texto
-    con el orden correcto para la recomposición.
+    Divides an image into num_slices square parts and generates a text file
+    with the correct order for reconstruction.
     
     Args:
-        image_path (str): Ruta a la imagen a dividir
-        num_slices (int): Número de partes (debe tener raíz cuadrada exacta)
-        output_dir (str): Carpeta donde guardar las partes
+        image_path (str): Path to the image to divide
+        num_slices (int): Number of parts (must have exact square root)
+        output_dir (str): Folder where to save the parts
     """
-    # Verificar que num_slices tiene raíz cuadrada exacta
+    # Verify that num_slices has an exact square root
     sqrt_slices = int(math.sqrt(num_slices))
     if sqrt_slices * sqrt_slices != num_slices:
         raise ValueError(f"El número {num_slices} no tiene raíz cuadrada exacta")
     
-    # Crear directorio de salida específico para esta imagen y número de slices
+    # Create specific output directory for this image and number of slices
     base_name = os.path.splitext(os.path.basename(image_path))[0]
     specific_output_dir = os.path.join(output_dir, f"{base_name}_{num_slices}slices")
     os.makedirs(specific_output_dir, exist_ok=True)
@@ -41,7 +41,7 @@ def slice_image(image_path, num_slices, output_dir="sliced_images"):
     slice_width = img_width // sqrt_slices
     slice_height = img_height // sqrt_slices
     
-    # Obtener nombre base del archivo sin extensión
+    # Get base filename without extension
     base_name = os.path.splitext(os.path.basename(image_path))[0]
     
     print(f"Dividiendo imagen {image_path} en {num_slices} partes ({sqrt_slices}x{sqrt_slices})")
@@ -83,7 +83,7 @@ def slice_image(image_path, num_slices, output_dir="sliced_images"):
         # Guardar el trozo
         cv2.imwrite(slice_path, slice_img)
         
-        # Agregar información del orden para recomposición
+        # Add order information for reconstruction
         slice_order.append({
             'filename': slice_filename,
             'row': row,
@@ -105,12 +105,12 @@ def slice_image(image_path, num_slices, output_dir="sliced_images"):
         f.write("NOTA: Los trozos fueron guardados en ORDEN ALEATORIO\n")
         f.write("-" * 50 + "\n\n")
         
-        # Escribir información detallada de cada trozo (ordenado por posición original)
-        f.write("ORDEN CORRECTO PARA RECOMPOSICIÓN:\n")
+        # Write detailed information for each piece (sorted by original position)
+        f.write("\nORDEN CORRECTO PARA RECOMPOSICIÓN:\n")
         f.write("Pos.Orig | Archivo Guardado    | Fila | Col | Índice Guardado\n")
         f.write("-" * 65 + "\n")
         
-        # Ordenar por posición original para mostrar el orden correcto
+        # Sort by original position to show correct order
         sorted_slices = sorted(slice_order, key=lambda x: x['original_position'])
         
         for slice_info in sorted_slices:
@@ -120,7 +120,7 @@ def slice_image(image_path, num_slices, output_dir="sliced_images"):
         
         f.write("\n" + "-" * 50 + "\n")
         f.write("MAPEO DE ARCHIVOS (Archivo -> Posición Original):\n")
-        # Ordenar por índice de archivo guardado
+        # Sort by saved file index
         sorted_by_file = sorted(slice_order, key=lambda x: x['saved_as_index'])
         for slice_info in sorted_by_file:
             f.write(f"{slice_info['filename']} -> Posición original {slice_info['original_position']} "
@@ -246,10 +246,10 @@ def main():
 
 
 if __name__ == "__main__":
-    # Configuración directa - Modifica estas variables según tus necesidades
-    IMAGE_FILE = "images/apple.png"  # Cambia por la ruta de tu imagen
-    NUM_SLICES = 4                       # Cambia por el número de trozos (debe tener raíz cuadrada exacta)
-    OUTPUT_DIR = "sliced_images"         # Carpeta donde guardar los trozos
+    # Direct configuration - Modify these variables according to your needs
+    DEFAULT_IMAGE_PATH = "images/example.jpg"    # Change to your image path
+    DEFAULT_NUM_SLICES = 4                       # Change to number of pieces (must have exact square root)
+    OUTPUT_DIR = "sliced_images"                 # Carpeta donde guardar los trozos
     
     import sys
     
@@ -270,17 +270,17 @@ if __name__ == "__main__":
         # Modo interactivo simplificado
         image_path = input("Ruta de la imagen: ").strip()
         if not image_path:
-            image_path = IMAGE_FILE
+            image_path = DEFAULT_IMAGE_PATH
             
         try:
-            num_input = input(f"Número de trozos (Enter para {NUM_SLICES}): ").strip()
+            num_input = input(f"Número de trozos (Enter para {DEFAULT_NUM_SLICES}): ").strip()
             if num_input:
                 num_slices = int(num_input)
             else:
-                num_slices = NUM_SLICES
+                num_slices = DEFAULT_NUM_SLICES
         except ValueError:
-            print(f"Valor inválido, usando {NUM_SLICES}")
-            num_slices = NUM_SLICES
+            print(f"Valor inválido, usando {DEFAULT_NUM_SLICES}")
+            num_slices = DEFAULT_NUM_SLICES
     
     print(f"\n🎯 Configuración:")
     print(f"   Imagen: {image_path}")
