@@ -91,6 +91,7 @@ def slice_image_v2(image_path, num_slices, output_dir="sliced_images_v2"):
     print(f"Original dimensions: {img_width}x{img_height}")
     print(f"Piece dimensions: {slice_width}x{slice_height}")
     print(f"Rotation: ENABLED (random 0°, 90°, 180°, 270°)")
+    print(f"Reference: Top-left corner piece is FIXED (no rotation, saved as {base_name}_slice_000.png)")
     
     # List to store slice order
     slice_order = []
@@ -98,13 +99,22 @@ def slice_image_v2(image_path, num_slices, output_dir="sliced_images_v2"):
     # Create list of positions and shuffle randomly
     slice_positions = []
     slice_index = 0
+    top_left_piece = None  # Store top-left corner piece separately
+    
     for row in range(sqrt_slices):
         for col in range(sqrt_slices):
-            slice_positions.append((row, col, slice_index))
+            if row == 0 and col == 0:
+                # Save top-left corner piece separately (will be placed first)
+                top_left_piece = (row, col, slice_index)
+            else:
+                slice_positions.append((row, col, slice_index))
             slice_index += 1
     
-    # Shuffle positions randomly
+    # Shuffle positions randomly (excluding top-left corner)
     random.shuffle(slice_positions)
+    
+    # Insert top-left corner piece at the beginning (will be saved as slice_000.png)
+    slice_positions.insert(0, top_left_piece)
     
     # Process each piece in random order
     for idx, (row, col, original_position) in enumerate(slice_positions):
@@ -117,8 +127,11 @@ def slice_image_v2(image_path, num_slices, output_dir="sliced_images_v2"):
         # Extract the piece using OpenCV (y:y+h, x:x+w)
         slice_img = img[top:bottom, left:right]
         
-        # Apply random rotation
-        rotation_angle = random.choice(ROTATION_ANGLES)
+        # Apply random rotation, EXCEPT for top-left corner piece (fixed as reference)
+        if row == 0 and col == 0:
+            rotation_angle = 0  # Top-left corner is FIXED (no rotation)
+        else:
+            rotation_angle = random.choice(ROTATION_ANGLES)
         rotated_slice = rotate_image(slice_img, rotation_angle)
         
         # Generate filename for the piece (using random index)
@@ -151,6 +164,9 @@ def slice_image_v2(image_path, num_slices, output_dir="sliced_images_v2"):
         f.write(f"Division: {sqrt_slices}x{sqrt_slices} ({num_slices} pieces)\n")
         f.write(f"Piece size: {slice_width}x{slice_height}\n")
         f.write("NOTE: Pieces were saved in RANDOM ORDER with RANDOM ROTATION\n")
+        f.write("REFERENCE: Top-left corner piece (Row 0, Col 0) is FIXED:\n")
+        f.write(f"           - Always saved as {base_name}_slice_000.png (first file)\n")
+        f.write("           - No rotation applied (0°)\n")
         f.write("-" * 70 + "\n\n")
         
         # Write detailed information for each piece (sorted by original position)

@@ -131,14 +131,19 @@ class PuzzleSolverBaseV2:
         print(f"[{self.__class__.__name__}] Loading {len(files)} pieces from {self.sliced_dir}...")
         print(f"[{self.__class__.__name__}] ROTATION SUPPORT: ENABLED")
         
-        for idx, fpath in enumerate(files):
+        # IMPORTANT: keep slice.id == index in self.slices.
+        # If a file can't be loaded and we skip it, using enumerate() would
+        # desync ids vs list indices, breaking calculate_cost() calls that
+        # assume indices. So we assign ids based on len(self.slices).
+        for fpath in files:
             img = cv2.imread(fpath)
-            if img is None: 
+            if img is None:
+                print(f"[{self.__class__.__name__}] ⚠ Could not load: {fpath} (skipping)")
                 continue
             
             # Store original image without rotation
             slice_obj = ImageSliceV2(
-                id=idx, 
+                id=len(self.slices),
                 filename=os.path.basename(fpath), 
                 original_image=img,
                 current_rotation=0
@@ -243,13 +248,28 @@ class PuzzleSolverBaseV2:
         grid = [[None for _ in range(cols)] for _ in range(rows)]
         used_indices = set()
         
-        # 1. Find corner piece with best rotation
-        print("Searching for top-left corner (with rotation)...")
-        start_idx, start_rotation = self.find_top_left_corner(n_slices)
-        self.slices[start_idx].set_rotation(start_rotation)
-        grid[0][0] = self.slices[start_idx]
-        used_indices.add(start_idx)
-        print(f"-> Initial piece: {self.slices[start_idx].filename} (rotation: {start_rotation}°)")
+        # 1) Anchor the reconstruction with the FIXED top-left piece produced by slice_images_v2.
+        #    Robustly locate it by filename, not by assuming it's index 0.
+        print("Using FIXED top-left corner piece (_slice_000.png)...")
+        fixed_idx = next(
+            (i for i, slc in enumerate(self.slices) if slc.filename.endswith("_slice_000.png")),
+            None
+        )
+
+        if fixed_idx is not None:
+            # Lock the anchor piece at (0,0) with 0° rotation.
+            self.slices[fixed_idx].id = fixed_idx  # enforce invariant id == list index
+            self.slices[fixed_idx].set_rotation(0)
+            grid[0][0] = self.slices[fixed_idx]
+            used_indices.add(fixed_idx)
+            print(f"-> Fixed piece: {self.slices[fixed_idx].filename} at (0,0) with rotation 0°")
+        else:
+            print("Warning: _slice_000.png not found, falling back to corner detection")
+            start_idx, start_rotation = self.find_top_left_corner(n_slices)
+            self.slices[start_idx].set_rotation(start_rotation)
+            grid[0][0] = self.slices[start_idx]
+            used_indices.add(start_idx)
+            print(f"-> Initial piece: {self.slices[start_idx].filename} (rotation: {start_rotation}°)")
         
         # 2. Fill grid
         for r in range(rows):
@@ -648,7 +668,9 @@ class PuzzleSolverBaseV2:
         specific_output_dir = os.path.join(self.output_dir, image_folder)
         os.makedirs(specific_output_dir, exist_ok=True)
         
-        h, w = self.slices[0].image.shape[:2]
+        # Use the placed piece size (anchor at grid[0][0]) instead of self.slices[0]
+        # to avoid surprises if list order differs.
+        h, w = grid[0][0].image.shape[:2]
         canvas = np.zeros((h * rows, w * cols, 3), dtype=np.uint8)
         
         method_name = self.__class__.__name__.replace('Solver', '').replace('V2', '').lower()

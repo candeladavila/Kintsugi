@@ -321,14 +321,14 @@ class GradientSolverV2(PuzzleSolverBaseV2):
         """
         Main solving method with rotation support.
         """
-        n = len(self.slices)
-        side = int(math.sqrt(n))
+        n_slices = len(self.slices)
+        side = int(math.sqrt(n_slices))
         rows, cols = side, side
         
         print(f"\n{'='*60}")
         print(f"GRADIENT RECONSTRUCTOR V2 - With Rotation Support")
         print(f"{'='*60}")
-        print(f"Pieces: {n} ({rows}x{cols})")
+        print(f"Pieces: {n_slices} ({rows}x{cols})")
         print(f"Border width: {self.border_width}px")
         print(f"Rotations: 0°, 90°, 180°, 270°")
         print(f"{'='*60}\n")
@@ -343,11 +343,18 @@ class GradientSolverV2(PuzzleSolverBaseV2):
         print(f"[{self.__class__.__name__}] Starting greedy reconstruction with rotations...")
         
         # Find corner piece
-        first_piece, first_rotation = self.find_corner_piece()
-        self.slices[first_piece].set_rotation(first_rotation)
-        grid[0][0] = self.slices[first_piece]
-        used_pieces.add(first_piece)
-        print(f"  Corner: piece #{first_piece} ({self.slices[first_piece].filename}) rotation {first_rotation}°")
+        print("Searching for top-left corner (with rotation)...")
+        start_idx = next((i for i, slc in enumerate(self.slices)
+                        if slc.filename.endswith("_slice_000.png")), None)
+
+        if start_idx is None:
+            start_idx, start_rotation = self.find_top_left_corner(n_slices)
+        else:
+            start_rotation = 0
+
+        self.slices[start_idx].set_rotation(start_rotation)
+        grid[0][0] = self.slices[start_idx]
+        used_pieces.add(start_idx)
         
         # Build grid
         for r in range(rows):

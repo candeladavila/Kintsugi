@@ -134,11 +134,17 @@ class ColorSolverV2(PuzzleSolverBaseV2):
         
         # 1. Find corner
         print("Searching for top-left corner (with rotation)...")
-        start_idx, start_rotation = self.find_top_left_corner(n_slices)
+        start_idx = next((i for i, slc in enumerate(self.slices)
+                        if slc.filename.endswith("_slice_000.png")), None)
+
+        if start_idx is None:
+            start_idx, start_rotation = self.find_top_left_corner(n_slices)
+        else:
+            start_rotation = 0
+
         self.slices[start_idx].set_rotation(start_rotation)
         grid[0][0] = self.slices[start_idx]
         used_indices.add(start_idx)
-        print(f"-> Initial piece: {self.slices[start_idx].filename} (rotation: {start_rotation}°)")
         
         # 2. Fill grid
         for r in range(rows):
