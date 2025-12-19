@@ -12,6 +12,17 @@ ENV/
 images/
 output_images/
 sliced_images/
+sliced_images_v1/
+sliced_images_v2/
+benchmark_output/
+border_analysis_output/
+borders_*/
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.tiff
+*.webp
 
 # IDE
 .vscode/
@@ -22,3 +33,7 @@ sliced_images/
 # OS
 .DS_Store
 Thumbs.db
+
+# Datasets
+datasets/
+cifar-10-batches-py/
