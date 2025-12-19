@@ -37,3 +37,7 @@ Thumbs.db
 # Datasets
 datasets/
 cifar-10-batches-py/
+*.gz
+*.tar.gz
+*.zip
+*.tar
