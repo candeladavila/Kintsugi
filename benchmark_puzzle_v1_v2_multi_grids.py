@@ -182,8 +182,27 @@ def run_benchmark(args):
                     solver = try_instantiate_solver(cls, args.border_width, args.output_dir)
                     if not solver: continue
                     
-                    solver.slices = [SimpleNamespace(id=i, image=p) for i, p in enumerate(pieces)] if v=="v1" \
-                                   else [SliceV2Adapter(i, "p.png", p) for i, p in enumerate(pieces)]
+                    # Construir slices según la versión
+                    if v == "v1":
+                        # V1 necesita slices con atributos: id, filename, image, borders
+                        solver.slices = []
+                        for i, p in enumerate(pieces):
+                            slice_obj = SimpleNamespace(
+                                id=i,
+                                filename=f"img_{idx:03d}_slice_{i:03d}.png",
+                                image=p,
+                                borders={}
+                            )
+                            # Extraer borders usando el método del solver si existe
+                            if hasattr(solver, 'extract_features'):
+                                slice_obj.borders = solver.extract_features(p)
+                            solver.slices.append(slice_obj)
+                    else:
+                        # V2 usa SliceV2Adapter
+                        solver.slices = [
+                            SliceV2Adapter(i, f"img_{idx:03d}_slice_{i:03d}.png", p) 
+                            for i, p in enumerate(pieces)
+                        ]
                     
                     try:
                         with time_limit(args.timeout):
