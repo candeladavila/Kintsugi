@@ -1,0 +1,96 @@
+[VERSION 2 - WITH ROTATION]
+Reconstruction information for: ciudad.jpeg
+Original image: 3024x3024
+Division: 5x5 (25 pieces)
+Piece size: 604x604
+NOTE: Pieces were saved in RANDOM ORDER with RANDOM ROTATION
+REFERENCE: Top-left corner piece (Row 0, Col 0) is FIXED:
+           - Always saved as ciudad_slice_000.png (first file)
+           - No rotation applied (0°)
+----------------------------------------------------------------------
+
+
+CORRECT ORDER FOR RECONSTRUCTION:
+Pos.Orig | File                | Row  | Col | Idx  | Applied Rot | Correct Rot
+-------------------------------------------------------------------------------------
+       0 | ciudad_slice_000.png |    0 |   0 |    0 |           0° |          0°
+       1 | ciudad_slice_019.png |    0 |   1 |   19 |          90° |        270°
+       2 | ciudad_slice_021.png |    0 |   2 |   21 |         270° |         90°
+       3 | ciudad_slice_018.png |    0 |   3 |   18 |           0° |          0°
+       4 | ciudad_slice_001.png |    0 |   4 |    1 |           0° |          0°
+       5 | ciudad_slice_017.png |    1 |   0 |   17 |         270° |         90°
+       6 | ciudad_slice_022.png |    1 |   1 |   22 |          90° |        270°
+       7 | ciudad_slice_024.png |    1 |   2 |   24 |         270° |         90°
+       8 | ciudad_slice_013.png |    1 |   3 |   13 |           0° |          0°
+       9 | ciudad_slice_009.png |    1 |   4 |    9 |         180° |        180°
+      10 | ciudad_slice_011.png |    2 |   0 |   11 |           0° |          0°
+      11 | ciudad_slice_005.png |    2 |   1 |    5 |          90° |        270°
+      12 | ciudad_slice_007.png |    2 |   2 |    7 |         180° |        180°
+      13 | ciudad_slice_023.png |    2 |   3 |   23 |           0° |          0°
+      14 | ciudad_slice_002.png |    2 |   4 |    2 |         180° |        180°
+      15 | ciudad_slice_016.png |    3 |   0 |   16 |           0° |          0°
+      16 | ciudad_slice_010.png |    3 |   1 |   10 |         180° |        180°
+      17 | ciudad_slice_008.png |    3 |   2 |    8 |           0° |          0°
+      18 | ciudad_slice_014.png |    3 |   3 |   14 |          90° |        270°
+      19 | ciudad_slice_020.png |    3 |   4 |   20 |         180° |        180°
+      20 | ciudad_slice_012.png |    4 |   0 |   12 |         270° |         90°
+      21 | ciudad_slice_003.png |    4 |   1 |    3 |           0° |          0°
+      22 | ciudad_slice_004.png |    4 |   2 |    4 |          90° |        270°
+      23 | ciudad_slice_006.png |    4 |   3 |    6 |           0° |          0°
+      24 | ciudad_slice_015.png |    4 |   4 |   15 |         270° |         90°
+
+----------------------------------------------------------------------
+FILE MAPPING (File -> Original Position + Rotation):
+ciudad_slice_000.png -> Position 0 (Row 0, Col 0) Rotate 0° to restore
+ciudad_slice_001.png -> Position 4 (Row 0, Col 4) Rotate 0° to restore
+ciudad_slice_002.png -> Position 14 (Row 2, Col 4) Rotate 180° to restore
+ciudad_slice_003.png -> Position 21 (Row 4, Col 1) Rotate 0° to restore
+ciudad_slice_004.png -> Position 22 (Row 4, Col 2) Rotate 270° to restore
+ciudad_slice_005.png -> Position 11 (Row 2, Col 1) Rotate 270° to restore
+ciudad_slice_006.png -> Position 23 (Row 4, Col 3) Rotate 0° to restore
+ciudad_slice_007.png -> Position 12 (Row 2, Col 2) Rotate 180° to restore
+ciudad_slice_008.png -> Position 17 (Row 3, Col 2) Rotate 0° to restore
+ciudad_slice_009.png -> Position 9 (Row 1, Col 4) Rotate 180° to restore
+ciudad_slice_010.png -> Position 16 (Row 3, Col 1) Rotate 180° to restore
+ciudad_slice_011.png -> Position 10 (Row 2, Col 0) Rotate 0° to restore
+ciudad_slice_012.png -> Position 20 (Row 4, Col 0) Rotate 90° to restore
+ciudad_slice_013.png -> Position 8 (Row 1, Col 3) Rotate 0° to restore
+ciudad_slice_014.png -> Position 18 (Row 3, Col 3) Rotate 270° to restore
+ciudad_slice_015.png -> Position 24 (Row 4, Col 4) Rotate 90° to restore
+ciudad_slice_016.png -> Position 15 (Row 3, Col 0) Rotate 0° to restore
+ciudad_slice_017.png -> Position 5 (Row 1, Col 0) Rotate 90° to restore
+ciudad_slice_018.png -> Position 3 (Row 0, Col 3) Rotate 0° to restore
+ciudad_slice_019.png -> Position 1 (Row 0, Col 1) Rotate 270° to restore
+ciudad_slice_020.png -> Position 19 (Row 3, Col 4) Rotate 180° to restore
+ciudad_slice_021.png -> Position 2 (Row 0, Col 2) Rotate 90° to restore
+ciudad_slice_022.png -> Position 6 (Row 1, Col 1) Rotate 270° to restore
+ciudad_slice_023.png -> Position 13 (Row 2, Col 3) Rotate 0° to restore
+ciudad_slice_024.png -> Position 7 (Row 1, Col 2) Rotate 90° to restore
+
+----------------------------------------------------------------------
+ORIGINAL COORDINATES:
+ciudad_slice_000.png: (0, 0) -> (604, 604) [Rotated 0°]
+ciudad_slice_019.png: (604, 0) -> (1208, 604) [Rotated 90°]
+ciudad_slice_021.png: (1208, 0) -> (1812, 604) [Rotated 270°]
+ciudad_slice_018.png: (1812, 0) -> (2416, 604) [Rotated 0°]
+ciudad_slice_001.png: (2416, 0) -> (3020, 604) [Rotated 0°]
+ciudad_slice_017.png: (0, 604) -> (604, 1208) [Rotated 270°]
+ciudad_slice_022.png: (604, 604) -> (1208, 1208) [Rotated 90°]
+ciudad_slice_024.png: (1208, 604) -> (1812, 1208) [Rotated 270°]
+ciudad_slice_013.png: (1812, 604) -> (2416, 1208) [Rotated 0°]
+ciudad_slice_009.png: (2416, 604) -> (3020, 1208) [Rotated 180°]
+ciudad_slice_011.png: (0, 1208) -> (604, 1812) [Rotated 0°]
+ciudad_slice_005.png: (604, 1208) -> (1208, 1812) [Rotated 90°]
+ciudad_slice_007.png: (1208, 1208) -> (1812, 1812) [Rotated 180°]
+ciudad_slice_023.png: (1812, 1208) -> (2416, 1812) [Rotated 0°]
+ciudad_slice_002.png: (2416, 1208) -> (3020, 1812) [Rotated 180°]
+ciudad_slice_016.png: (0, 1812) -> (604, 2416) [Rotated 0°]
+ciudad_slice_010.png: (604, 1812) -> (1208, 2416) [Rotated 180°]
+ciudad_slice_008.png: (1208, 1812) -> (1812, 2416) [Rotated 0°]
+ciudad_slice_014.png: (1812, 1812) -> (2416, 2416) [Rotated 90°]
+ciudad_slice_020.png: (2416, 1812) -> (3020, 2416) [Rotated 180°]
+ciudad_slice_012.png: (0, 2416) -> (604, 3020) [Rotated 270°]
+ciudad_slice_003.png: (604, 2416) -> (1208, 3020) [Rotated 0°]
+ciudad_slice_004.png: (1208, 2416) -> (1812, 3020) [Rotated 90°]
+ciudad_slice_006.png: (1812, 2416) -> (2416, 3020) [Rotated 0°]
+ciudad_slice_015.png: (2416, 2416) -> (3020, 3020) [Rotated 270°]

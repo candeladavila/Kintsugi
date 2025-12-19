@@ -14,6 +14,9 @@ An intelligent image puzzle system that divides images into randomized pieces an
   - **Gradient Analysis**: Uses edge detection and gradient matching for intelligent piece placement
   - **Color Analysis**: Employs LAB color space for perceptually accurate edge matching
   - **Random Assembly**: Baseline comparison using random piece arrangement
+- **Benchmarking Suite**: Comprehensive performance evaluation across multiple puzzle sizes and datasets
+- **Border Analysis Tools**: Visualize and compare edge compatibility between puzzle pieces
+- **Clean Grid Generation**: Create visualization-ready puzzle reconstructions without metrics
 - **Configurable Border Width**: Adjust analysis width (10-100 pixels) for optimal matching
 - **Organized Output**: Structured file organization by version, image name and slice count
 - **Interactive & CLI Modes**: Both user-friendly interactive mode and command-line interface
@@ -42,6 +45,8 @@ python main.py
 2. **Command Line Mode**:
 ```bash
 python main.py path/to/image.jpg 16 gradient
+# You can also pass just the filename if the image is in the `images/` folder:
+# python main.py example.jpg 16 gradient
 ```
 
 3. **All reconstruction methods**:
@@ -60,6 +65,8 @@ python main.py
 ```bash
 # Slice an image into 16 pieces and reconstruct using all methods
 python main.py images/example.jpg 16 all
+# Or simply:
+# python main.py example.jpg 16 all   # resolves to images/example.jpg if present
 
 # Results will be saved to:
 # - sliced_images/example_16slices/ (puzzle pieces)
@@ -101,20 +108,46 @@ solver = ColorSolver("sliced_images/example_16slices",
 
 ```
 Kintsugi/
-├── main.py                     # Main orchestrator script
-├── slice_images.py             # Image slicing functionality
-├── puzzle_solver.py            # Unified reconstruction interface
-├── puzzle_reconstructor/       # Reconstruction algorithms package
+├── main.py                              # Main orchestrator script
+├── slice_images.py                      # Image slicing V1 (no rotation)
+├── slice_images_v2.py                   # Image slicing V2 (with rotation)
+├── puzzle_solver.py                     # Unified reconstruction interface
+├── benchmark_puzzle_v1_v2_multi_grids.py # Comprehensive benchmarking tool
+├── compare_slice_borders.py             # Visual border comparison tool
+├── analyze_border_slice_6_vs_7.py       # Border analysis for specific slices
+├── generate_clean_grid.py               # Clean grid generation V1
+├── generate_clean_grid_v2.py            # Clean grid generation V2
+├── extract_borders.py                   # Border extraction utility
+├── puzzle_reconstructor/                # V1 Reconstruction algorithms
 │   ├── __init__.py
-│   ├── puzzle_base.py          # Base class for all solvers
-│   ├── gradient_reconstructor.py   # Gradient-based reconstruction
-│   ├── color_reconstructor.py      # Color-based reconstruction
-│   └── random_reconstructor.py     # Random baseline reconstruction
-├── images/                     # Input images directory
-├── sliced_images/             # Generated puzzle pieces
-│   └── [imagename]_[N]slices/ # Organized by image and slice count
-└── output_images/             # Reconstructed results
-    └── [imagename]_[N]slices/ # Results organized by method
+│   ├── puzzle_base.py                   # Base class for V1 solvers
+│   ├── gradient_reconstructor.py        # Gradient-based reconstruction
+│   ├── color_reconstructor.py           # Color-based reconstruction
+│   ├── paikin_reconstructor.py          # Paikin Best Buddies algorithm
+│   └── random_reconstructor.py          # Random baseline reconstruction
+├── puzzle_reconstructor_v2/             # V2 Reconstruction (with rotation)
+│   ├── __init__.py
+│   ├── puzzle_base_v2.py                # Base class for V2 solvers
+│   ├── gradient_reconstructor_v2.py     # Gradient with rotation support
+│   ├── color_reconstructor_v2.py        # Color with rotation support
+│   ├── paikin_reconstructor_v2.py       # Paikin with rotation support
+│   └── random_reconstructor_v2.py       # Random with rotation support
+├── images/                              # Input images directory
+├── sliced_images_v1/                    # V1 puzzle pieces (no rotation)
+│   └── [imagename]_[N]slices/
+├── sliced_images_v2/                    # V2 puzzle pieces (with rotation)
+│   └── [imagename]_[N]slices/
+├── output_images/                       # Reconstructed results
+│   ├── ver_1/                           # V1 reconstructions
+│   ├── ver_2/                           # V2 reconstructions
+│   ├── ver_1_clean_grid/                # Clean V1 visualizations
+│   └── ver_2_clean_grid/                # Clean V2 visualizations
+├── benchmark_output/                    # Benchmark results
+│   ├── v1/                              # V1 benchmark data
+│   ├── v2/                              # V2 benchmark data
+│   ├── benchmark_summary.json           # JSON summary
+│   └── benchmark_summary.csv            # CSV summary
+└── border_analysis_output/              # Border comparison visualizations
 ```
 
 ## 🛠️ Components
@@ -131,6 +164,8 @@ Divides input images into square puzzle pieces with the following features:
 **Usage:**
 ```bash
 python slice_images.py image.jpg 16
+# You can also pass a filename that exists in the `images/` folder:
+# python slice_images.py example.jpg 16
 ```
 
 ### Reconstruction Algorithms
@@ -239,6 +274,55 @@ for img in images/*.jpg; do
 done
 ```
 
+## � Advanced Tools
+
+### Benchmarking Suite
+
+Evaluate reconstruction algorithms across multiple images and puzzle sizes:
+
+```bash
+python benchmark_puzzle_v1_v2_multi_grids.py \
+    --num-images 50 \
+    --grid-sizes 3,5,10 \
+    --timeout 300 \
+    --border-width 10
+```
+
+Features:
+- Tests on CIFAR-10 dataset (automatic download)
+- Multiple grid sizes (3×3, 5×5, 10×10, etc.)
+- Timeout protection to prevent infinite loops
+- Generates JSON and CSV summaries
+- Calculates piece accuracy, border accuracy, and runtime metrics
+
+### Border Analysis Tools
+
+#### Compare Specific Slice Borders
+```bash
+python compare_slice_borders.py
+```
+Generates visual comparison of border matching between two specific puzzle pieces.
+
+#### Analyze All Border Combinations
+```bash
+python analyze_border_slice_6_vs_7.py
+```
+Creates 4 visualizations comparing one slice's border against all 4 borders of another slice.
+
+### Clean Grid Generation
+
+Generate visualization-ready puzzle reconstructions without metrics overlay:
+
+```bash
+# For V1 reconstructions
+python generate_clean_grid.py
+
+# For V2 reconstructions (with rotation)
+python generate_clean_grid_v2.py
+```
+
+Outputs clean grid images with only border lines, perfect for presentations and papers.
+
 ## 🐛 Troubleshooting
 
 ### Common Issues
@@ -249,10 +333,13 @@ done
 2. **Import errors**:
    - Solution: Ensure OpenCV and NumPy are installed: `pip install opencv-python numpy`
 
-3. **Image not found**:
+3. **Timeout errors in benchmark**:
+   - Solution: Increase `--timeout` parameter or reduce grid size
+
+4. **Image not found**:
    - Solution: Check file path and supported formats
 
-4. **Permission errors**:
+5. **Permission errors**:
    - Solution: Ensure write permissions for output directories
 
 ### Debugging Tips
@@ -261,26 +348,47 @@ done
 - Check that input images are not corrupted
 - Verify sufficient disk space for output files
 - Ensure Python 3.6+ compatibility
+- For benchmarks, start with small `--num-images` to test
 
 ### Development Setup
 
 ```bash
 # Install development dependencies
-pip install opencv-python numpy pytest
+pip install opencv-python numpy matplotlib torch torchvision
+
+# For benchmarking (CIFAR-10 dataset)
+pip install torch torchvision pillow
 
 # Run tests (if available)
 pytest tests/
 
 # Format code
-black *.py puzzle_reconstructor/*.py
+black *.py puzzle_reconstructor/*.py puzzle_reconstructor_v2/*.py
 ```
+
+## 📊 Benchmark Results
+
+The benchmark suite evaluates algorithms across multiple metrics:
+
+- **Piece Accuracy Index**: Proportion of pieces in correct positions (0-1)
+- **Border Accuracy Index**: Proportion of correct neighbor pairs (0-1)
+- **Rotation Accuracy Index** (V2 only): Proportion of pieces with correct rotation (0-1)
+- **Runtime**: Average execution time in seconds
+
+Results are saved as:
+- `benchmark_output/benchmark_summary.json` (detailed results)
+- `benchmark_output/benchmark_summary.csv` (spreadsheet-friendly)
 
 ## 🎯 Future Enhancements
 
-- [ ] Advanced piece rotation handling
+- [x] Advanced piece rotation handling (V2 implemented)
+- [x] Comprehensive benchmarking suite
+- [x] Border analysis visualization tools
 - [ ] Other methods for reconstruction:
     - [ ] MGC (Mahalanobis Gradient Covariance): "Jigsaw Puzzles with Pieces of Unknown Orientation" (Gallagher & Chen, CVPR 2012)
     - [ ] Minimum Spanning Tree (MST)
+- [ ] GPU acceleration for large puzzles
+- [ ] Real-time reconstruction progress visualization
 
 ## 🙏 Acknowledgments
 

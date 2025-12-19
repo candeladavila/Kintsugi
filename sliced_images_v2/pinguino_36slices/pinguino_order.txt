@@ -1,0 +1,129 @@
+[VERSION 2 - WITH ROTATION]
+Reconstruction information for: pinguino.jpeg
+Original image: 851x851
+Division: 6x6 (36 pieces)
+Piece size: 141x141
+NOTE: Pieces were saved in RANDOM ORDER with RANDOM ROTATION
+REFERENCE: Top-left corner piece (Row 0, Col 0) is FIXED:
+           - Always saved as pinguino_slice_000.png (first file)
+           - No rotation applied (0°)
+----------------------------------------------------------------------
+
+
+CORRECT ORDER FOR RECONSTRUCTION:
+Pos.Orig | File                | Row  | Col | Idx  | Applied Rot | Correct Rot
+-------------------------------------------------------------------------------------
+       0 | pinguino_slice_000.png |    0 |   0 |    0 |           0° |          0°
+       1 | pinguino_slice_029.png |    0 |   1 |   29 |         180° |        180°
+       2 | pinguino_slice_027.png |    0 |   2 |   27 |          90° |        270°
+       3 | pinguino_slice_016.png |    0 |   3 |   16 |         180° |        180°
+       4 | pinguino_slice_015.png |    0 |   4 |   15 |          90° |        270°
+       5 | pinguino_slice_021.png |    0 |   5 |   21 |         270° |         90°
+       6 | pinguino_slice_011.png |    1 |   0 |   11 |         180° |        180°
+       7 | pinguino_slice_002.png |    1 |   1 |    2 |         270° |         90°
+       8 | pinguino_slice_031.png |    1 |   2 |   31 |         180° |        180°
+       9 | pinguino_slice_007.png |    1 |   3 |    7 |          90° |        270°
+      10 | pinguino_slice_025.png |    1 |   4 |   25 |           0° |          0°
+      11 | pinguino_slice_009.png |    1 |   5 |    9 |          90° |        270°
+      12 | pinguino_slice_010.png |    2 |   0 |   10 |         180° |        180°
+      13 | pinguino_slice_034.png |    2 |   1 |   34 |           0° |          0°
+      14 | pinguino_slice_012.png |    2 |   2 |   12 |         180° |        180°
+      15 | pinguino_slice_014.png |    2 |   3 |   14 |         270° |         90°
+      16 | pinguino_slice_013.png |    2 |   4 |   13 |         180° |        180°
+      17 | pinguino_slice_006.png |    2 |   5 |    6 |           0° |          0°
+      18 | pinguino_slice_022.png |    3 |   0 |   22 |          90° |        270°
+      19 | pinguino_slice_018.png |    3 |   1 |   18 |         180° |        180°
+      20 | pinguino_slice_024.png |    3 |   2 |   24 |         180° |        180°
+      21 | pinguino_slice_032.png |    3 |   3 |   32 |         270° |         90°
+      22 | pinguino_slice_001.png |    3 |   4 |    1 |         180° |        180°
+      23 | pinguino_slice_023.png |    3 |   5 |   23 |          90° |        270°
+      24 | pinguino_slice_035.png |    4 |   0 |   35 |         180° |        180°
+      25 | pinguino_slice_003.png |    4 |   1 |    3 |         270° |         90°
+      26 | pinguino_slice_028.png |    4 |   2 |   28 |           0° |          0°
+      27 | pinguino_slice_017.png |    4 |   3 |   17 |          90° |        270°
+      28 | pinguino_slice_008.png |    4 |   4 |    8 |         270° |         90°
+      29 | pinguino_slice_004.png |    4 |   5 |    4 |         270° |         90°
+      30 | pinguino_slice_005.png |    5 |   0 |    5 |         270° |         90°
+      31 | pinguino_slice_020.png |    5 |   1 |   20 |         270° |         90°
+      32 | pinguino_slice_026.png |    5 |   2 |   26 |          90° |        270°
+      33 | pinguino_slice_030.png |    5 |   3 |   30 |          90° |        270°
+      34 | pinguino_slice_033.png |    5 |   4 |   33 |           0° |          0°
+      35 | pinguino_slice_019.png |    5 |   5 |   19 |         180° |        180°
+
+----------------------------------------------------------------------
+FILE MAPPING (File -> Original Position + Rotation):
+pinguino_slice_000.png -> Position 0 (Row 0, Col 0) Rotate 0° to restore
+pinguino_slice_001.png -> Position 22 (Row 3, Col 4) Rotate 180° to restore
+pinguino_slice_002.png -> Position 7 (Row 1, Col 1) Rotate 90° to restore
+pinguino_slice_003.png -> Position 25 (Row 4, Col 1) Rotate 90° to restore
+pinguino_slice_004.png -> Position 29 (Row 4, Col 5) Rotate 90° to restore
+pinguino_slice_005.png -> Position 30 (Row 5, Col 0) Rotate 90° to restore
+pinguino_slice_006.png -> Position 17 (Row 2, Col 5) Rotate 0° to restore
+pinguino_slice_007.png -> Position 9 (Row 1, Col 3) Rotate 270° to restore
+pinguino_slice_008.png -> Position 28 (Row 4, Col 4) Rotate 90° to restore
+pinguino_slice_009.png -> Position 11 (Row 1, Col 5) Rotate 270° to restore
+pinguino_slice_010.png -> Position 12 (Row 2, Col 0) Rotate 180° to restore
+pinguino_slice_011.png -> Position 6 (Row 1, Col 0) Rotate 180° to restore
+pinguino_slice_012.png -> Position 14 (Row 2, Col 2) Rotate 180° to restore
+pinguino_slice_013.png -> Position 16 (Row 2, Col 4) Rotate 180° to restore
+pinguino_slice_014.png -> Position 15 (Row 2, Col 3) Rotate 90° to restore
+pinguino_slice_015.png -> Position 4 (Row 0, Col 4) Rotate 270° to restore
+pinguino_slice_016.png -> Position 3 (Row 0, Col 3) Rotate 180° to restore
+pinguino_slice_017.png -> Position 27 (Row 4, Col 3) Rotate 270° to restore
+pinguino_slice_018.png -> Position 19 (Row 3, Col 1) Rotate 180° to restore
+pinguino_slice_019.png -> Position 35 (Row 5, Col 5) Rotate 180° to restore
+pinguino_slice_020.png -> Position 31 (Row 5, Col 1) Rotate 90° to restore
+pinguino_slice_021.png -> Position 5 (Row 0, Col 5) Rotate 90° to restore
+pinguino_slice_022.png -> Position 18 (Row 3, Col 0) Rotate 270° to restore
+pinguino_slice_023.png -> Position 23 (Row 3, Col 5) Rotate 270° to restore
+pinguino_slice_024.png -> Position 20 (Row 3, Col 2) Rotate 180° to restore
+pinguino_slice_025.png -> Position 10 (Row 1, Col 4) Rotate 0° to restore
+pinguino_slice_026.png -> Position 32 (Row 5, Col 2) Rotate 270° to restore
+pinguino_slice_027.png -> Position 2 (Row 0, Col 2) Rotate 270° to restore
+pinguino_slice_028.png -> Position 26 (Row 4, Col 2) Rotate 0° to restore
+pinguino_slice_029.png -> Position 1 (Row 0, Col 1) Rotate 180° to restore
+pinguino_slice_030.png -> Position 33 (Row 5, Col 3) Rotate 270° to restore
+pinguino_slice_031.png -> Position 8 (Row 1, Col 2) Rotate 180° to restore
+pinguino_slice_032.png -> Position 21 (Row 3, Col 3) Rotate 90° to restore
+pinguino_slice_033.png -> Position 34 (Row 5, Col 4) Rotate 0° to restore
+pinguino_slice_034.png -> Position 13 (Row 2, Col 1) Rotate 0° to restore
+pinguino_slice_035.png -> Position 24 (Row 4, Col 0) Rotate 180° to restore
+
+----------------------------------------------------------------------
+ORIGINAL COORDINATES:
+pinguino_slice_000.png: (0, 0) -> (141, 141) [Rotated 0°]
+pinguino_slice_029.png: (141, 0) -> (282, 141) [Rotated 180°]
+pinguino_slice_027.png: (282, 0) -> (423, 141) [Rotated 90°]
+pinguino_slice_016.png: (423, 0) -> (564, 141) [Rotated 180°]
+pinguino_slice_015.png: (564, 0) -> (705, 141) [Rotated 90°]
+pinguino_slice_021.png: (705, 0) -> (846, 141) [Rotated 270°]
+pinguino_slice_011.png: (0, 141) -> (141, 282) [Rotated 180°]
+pinguino_slice_002.png: (141, 141) -> (282, 282) [Rotated 270°]
+pinguino_slice_031.png: (282, 141) -> (423, 282) [Rotated 180°]
+pinguino_slice_007.png: (423, 141) -> (564, 282) [Rotated 90°]
+pinguino_slice_025.png: (564, 141) -> (705, 282) [Rotated 0°]
+pinguino_slice_009.png: (705, 141) -> (846, 282) [Rotated 90°]
+pinguino_slice_010.png: (0, 282) -> (141, 423) [Rotated 180°]
+pinguino_slice_034.png: (141, 282) -> (282, 423) [Rotated 0°]
+pinguino_slice_012.png: (282, 282) -> (423, 423) [Rotated 180°]
+pinguino_slice_014.png: (423, 282) -> (564, 423) [Rotated 270°]
+pinguino_slice_013.png: (564, 282) -> (705, 423) [Rotated 180°]
+pinguino_slice_006.png: (705, 282) -> (846, 423) [Rotated 0°]
+pinguino_slice_022.png: (0, 423) -> (141, 564) [Rotated 90°]
+pinguino_slice_018.png: (141, 423) -> (282, 564) [Rotated 180°]
+pinguino_slice_024.png: (282, 423) -> (423, 564) [Rotated 180°]
+pinguino_slice_032.png: (423, 423) -> (564, 564) [Rotated 270°]
+pinguino_slice_001.png: (564, 423) -> (705, 564) [Rotated 180°]
+pinguino_slice_023.png: (705, 423) -> (846, 564) [Rotated 90°]
+pinguino_slice_035.png: (0, 564) -> (141, 705) [Rotated 180°]
+pinguino_slice_003.png: (141, 564) -> (282, 705) [Rotated 270°]
+pinguino_slice_028.png: (282, 564) -> (423, 705) [Rotated 0°]
+pinguino_slice_017.png: (423, 564) -> (564, 705) [Rotated 90°]
+pinguino_slice_008.png: (564, 564) -> (705, 705) [Rotated 270°]
+pinguino_slice_004.png: (705, 564) -> (846, 705) [Rotated 270°]
+pinguino_slice_005.png: (0, 705) -> (141, 846) [Rotated 270°]
+pinguino_slice_020.png: (141, 705) -> (282, 846) [Rotated 270°]
+pinguino_slice_026.png: (282, 705) -> (423, 846) [Rotated 90°]
+pinguino_slice_030.png: (423, 705) -> (564, 846) [Rotated 90°]
+pinguino_slice_033.png: (564, 705) -> (705, 846) [Rotated 0°]
+pinguino_slice_019.png: (705, 705) -> (846, 846) [Rotated 180°]

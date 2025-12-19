@@ -56,7 +56,6 @@ def select_version():
         else:
             print("Please enter 1, 2 or 3")
 
-
 # =============================================================================
 #   V1 FUNCTIONS (No Rotation) - Original
 # =============================================================================
@@ -65,33 +64,29 @@ def run_slice_images_v1(image_path, num_slices):
     """
     Executes slice_images.py with the specified parameters (V1 - no rotation)
     """
-    print("🔪 Starting image slicing (V1 - No Rotation)...")
-    print("-" * 40)
+    print("Starting image slicing")
     
     try:
         # Import and execute directly instead of subprocess
         import slice_images
-        slice_images.slice_image(image_path, num_slices, "sliced_images")
+        slice_images.slice_image(image_path, num_slices, "sliced_images_v1")
         return True
         
     except Exception as e:
         print(f"Error during slicing: {e}")
         return False
 
-def run_puzzle_solver_v1(image_name, num_slices, method='all'):
+def run_puzzle_solver_v1(image_name, num_slices, method='all', border_width=100):
     """
     Executes puzzle_solver.py with the specified configuration (V1 - no rotation)
     """
     
     try:
         # Find the specific folder created by slice_images
-        sliced_dir = f"sliced_images/{image_name}_{num_slices}slices"
+        sliced_dir = f"sliced_images_v1/{image_name}_{num_slices}slices"
         if not os.path.exists(sliced_dir):
             print(f"Error: Folder not found {sliced_dir}")
             return False
-        
-        # Manually create solvers with correct paths
-        print(f"📂 Using pieces folder: {sliced_dir}")
         
         # Import required modules
         sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'puzzle_reconstructor'))
@@ -126,7 +121,8 @@ def run_puzzle_solver_v1(image_name, num_slices, method='all'):
         for method_name, solver_class in methods_to_run:
             try:
                 print(f"\nExecuting method: {method_name.upper()}")
-                solver = solver_class(sliced_dir, output_dir, image_name)
+                print(f"Border width: {border_width}px")
+                solver = solver_class(sliced_dir, output_dir, image_name, border_width)
                 solver.load_slices(image_name)
                 solver.solve()
                 success_count += 1
@@ -159,22 +155,21 @@ def run_slice_images_v2(image_path, num_slices):
     
     try:
         import slice_images_v2
-        slice_images_v2.slice_image_v2(image_path, num_slices, "sliced_images")
+        slice_images_v2.slice_image_v2(image_path, num_slices, "sliced_images_v2")
         return True
     except Exception as e:
         print(f"Error during slicing: {e}")
         return False
 
-
-def run_puzzle_solver_v2(image_name, num_slices, method='all'):
+def run_puzzle_solver_v2(image_name, num_slices, method='all', border_width=100):
     """
     Reconstructs puzzle using V2 solvers (with rotation support).
     """
     
     try:
-        sliced_dir = f"sliced_images/{image_name}_{num_slices}slices"
+        sliced_dir = f"sliced_images_v2/{image_name}_{num_slices}slices"
         if not os.path.exists(sliced_dir):
-            print(f"Error: No se encontró la carpeta {sliced_dir}")
+            print(f"Error: Folder not found {sliced_dir}")
             return False
         
         sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'puzzle_reconstructor_v2'))
@@ -207,7 +202,9 @@ def run_puzzle_solver_v2(image_name, num_slices, method='all'):
         success_count = 0
         for method_name, solver_class in methods_to_run:
             try:
-                solver = solver_class(sliced_dir, output_dir, image_name)
+                print(f"\nExecuting method: {method_name.upper()} V2")
+                print(f"Border width: {border_width}px")
+                solver = solver_class(sliced_dir, output_dir, image_name, border_width)
                 solver.load_slices(image_name)
                 solver.solve()
                 success_count += 1
@@ -230,7 +227,6 @@ def run_puzzle_solver_v2(image_name, num_slices, method='all'):
         print(f"Error during reconstruction: {e}")
         return False
 
-
 # =============================================================================
 #   UTILITY FUNCTIONS
 # =============================================================================
@@ -240,21 +236,45 @@ def get_image_name(image_path):
     return Path(image_path).stem
 
 def validate_image_exists(image_path):
-    """Validates that the image file exists"""
-    if not os.path.exists(image_path):
+    """Validate that the image exists either as given or inside `images/`.
+
+    Returns the resolved path if found, otherwise `None`.
+    """
+    # Direct path
+    if os.path.exists(image_path):
+        resolved = image_path
+    else:
+        # Try inside images/ directory
+        candidate = os.path.join("images", image_path)
+        if os.path.exists(candidate):
+            resolved = candidate
+        else:
+            # Try common extensions if user provided base name without extension
+            name, ext = os.path.splitext(image_path)
+            if ext == "":
+                for ext_try in ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp']:
+                    candidate_ext = os.path.join("images", name + ext_try)
+                    if os.path.exists(candidate_ext):
+                        resolved = candidate_ext
+                        break
+                else:
+                    resolved = None
+            else:
+                resolved = None
+
+    if not resolved:
         print(f"Error: File not found {image_path}")
-        return False
-    
-    # Verify that it's a valid image file
+        return None
+
+    # Verify that it's a valid image file by extension
     valid_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp']
-    ext = Path(image_path).suffix.lower()
-    
+    ext = Path(resolved).suffix.lower()
     if ext not in valid_extensions:
         print(f"Error: {ext} is not a supported image format")
         print(f"Valid formats: {', '.join(valid_extensions)}")
-        return False
-    
-    return True
+        return None
+
+    return resolved
 
 def validate_num_slices(num_slices):
     """Validates that the number of slices has an exact square root"""
@@ -284,9 +304,9 @@ def interactive_mode(version=1):
             print("Please enter a valid path")
             continue
         
-        image_path = image_input
-        
-        if validate_image_exists(image_path):
+        resolved = validate_image_exists(image_input)
+        if resolved:
+            image_path = resolved
             break
     
     # Get number of slices
@@ -325,7 +345,39 @@ def interactive_mode(version=1):
         else:
             print("Please select a valid option (1-5)")
     
-    return image_path, num_slices, method
+    # Configure border_width
+    print("\nBorder width configuration:")
+    print("  Border width determines how many pixels from edges are analyzed")
+    print("  Default: 100 pixels (recommended for most cases)")
+    
+    while True:
+        border_input = input("\nUse default (100px)? (Enter for yes, or type a value): ").strip()
+        
+        if not border_input:  # Use default
+            border_width = 100
+            print("Using default: 100 pixels")
+            break
+        
+        try:
+            border_width = int(border_input)
+            
+            if border_width <= 0:
+                print("Error: Border width must be positive")
+                continue
+            
+            if border_width > 500:
+                print("Warning: Very large border width (>500px) may include too much interior")
+                confirm = input("Continue anyway? (y/n): ").strip().lower()
+                if confirm != 'y':
+                    continue
+            
+            print(f"Using border width: {border_width} pixels")
+            break
+            
+        except ValueError:
+            print("Error: Please enter a valid number")
+    
+    return image_path, num_slices, method, border_width
 
 def main():
     """Main function"""
@@ -348,16 +400,19 @@ def main():
             return
         
         method = sys.argv[3] if len(sys.argv) > 3 else 'all'
+        border_width = 100  # Default for command line mode
         
         # Validations
-        if not validate_image_exists(image_path):
+        resolved = validate_image_exists(image_path)
+        if not resolved:
             return
+        image_path = resolved
         if not validate_num_slices(num_slices):
             return
         
     else:
         # Interactive mode - pass version for display
-        image_path, num_slices, method = interactive_mode(version)
+        image_path, num_slices, method, border_width = interactive_mode(version)
     
     # Get base image name
     image_name = get_image_name(image_path)
@@ -394,7 +449,7 @@ def main():
             print("\nImage slicing failed. Process terminated.")
             return
         
-        success = run_puzzle_solver_v1(image_name, num_slices, method)
+        success = run_puzzle_solver_v1(image_name, num_slices, method, border_width)
         if not success:
             print("\nPuzzle reconstruction failed.")
             return
@@ -406,7 +461,7 @@ def main():
             print("\nImage slicing failed. Process terminated.")
             return
         
-        success = run_puzzle_solver_v2(image_name, num_slices, method)
+        success = run_puzzle_solver_v2(image_name, num_slices, method, border_width)
         if not success:
             print("\nPuzzle reconstruction failed.")
             return
@@ -418,7 +473,7 @@ def main():
         
         success_v1 = run_slice_images_v1(image_path, num_slices)
         if success_v1:
-            success_v1 = run_puzzle_solver_v1(image_name, num_slices, method)
+            success_v1 = run_puzzle_solver_v1(image_name, num_slices, method, border_width)
         
         print("\n" + "=" * 60)
         print("PART 2/2: EXECUTING VERSION 2 (With Rotation)")
@@ -426,7 +481,7 @@ def main():
         
         success_v2 = run_slice_images_v2(image_path, num_slices)
         if success_v2:
-            success_v2 = run_puzzle_solver_v2(image_name, num_slices, method)
+            success_v2 = run_puzzle_solver_v2(image_name, num_slices, method, border_width)
         
         # Summary for both versions
         print("\n" + "=" * 60)
@@ -440,7 +495,8 @@ def main():
             print("BOTH VERSIONS FAILED")
             return
         print("=" * 60)
-        print(f"Pieces saved in: {sliced_folder}/{image_name}_{num_slices}slices/")
+        print(f"V1 pieces saved in: sliced_images_v1/{image_name}_{num_slices}slices/")
+        print(f"V2 pieces saved in: sliced_images_v2/{image_name}_{num_slices}slices/")
         print(f"V1 results: output_images/ver_1/{image_name}_{num_slices}slices/")
         print(f"V2 results: output_images/ver_2/{image_name}_{num_slices}slices/")
         return
@@ -449,7 +505,10 @@ def main():
     print("\n" + "=" * 60)
     print("PROCESS COMPLETED SUCCESSFULLY")
     print("=" * 60)
-    print(f"Pieces saved in: {sliced_folder}/{image_name}_{num_slices}slices/")
+    if version == 1:
+        print(f"Pieces saved in: sliced_images_v1/{image_name}_{num_slices}slices/")
+    else:
+        print(f"Pieces saved in: sliced_images_v2/{image_name}_{num_slices}slices/")
     print(f"Results in: {output_folder}/{image_name}_{num_slices}slices/")
     if version == 2:
         print("Note: V2 includes rotation accuracy metrics")

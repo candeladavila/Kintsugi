@@ -1,0 +1,69 @@
+[VERSION 2 - WITH ROTATION]
+Reconstruction information for: dog.jpg
+Original image: 1024x1024
+Division: 4x4 (16 pieces)
+Piece size: 256x256
+NOTE: Pieces were saved in RANDOM ORDER with RANDOM ROTATION
+REFERENCE: Top-left corner piece (Row 0, Col 0) is FIXED:
+           - Always saved as dog_slice_000.png (first file)
+           - No rotation applied (0°)
+----------------------------------------------------------------------
+
+
+CORRECT ORDER FOR RECONSTRUCTION:
+Pos.Orig | File                | Row  | Col | Idx  | Applied Rot | Correct Rot
+-------------------------------------------------------------------------------------
+       0 | dog_slice_000.png  |    0 |   0 |    0 |           0° |          0°
+       1 | dog_slice_009.png  |    0 |   1 |    9 |          90° |        270°
+       2 | dog_slice_004.png  |    0 |   2 |    4 |          90° |        270°
+       3 | dog_slice_010.png  |    0 |   3 |   10 |           0° |          0°
+       4 | dog_slice_013.png  |    1 |   0 |   13 |           0° |          0°
+       5 | dog_slice_011.png  |    1 |   1 |   11 |           0° |          0°
+       6 | dog_slice_008.png  |    1 |   2 |    8 |         180° |        180°
+       7 | dog_slice_006.png  |    1 |   3 |    6 |          90° |        270°
+       8 | dog_slice_012.png  |    2 |   0 |   12 |         180° |        180°
+       9 | dog_slice_001.png  |    2 |   1 |    1 |         270° |         90°
+      10 | dog_slice_003.png  |    2 |   2 |    3 |          90° |        270°
+      11 | dog_slice_005.png  |    2 |   3 |    5 |          90° |        270°
+      12 | dog_slice_015.png  |    3 |   0 |   15 |          90° |        270°
+      13 | dog_slice_007.png  |    3 |   1 |    7 |         270° |         90°
+      14 | dog_slice_002.png  |    3 |   2 |    2 |         180° |        180°
+      15 | dog_slice_014.png  |    3 |   3 |   14 |         270° |         90°
+
+----------------------------------------------------------------------
+FILE MAPPING (File -> Original Position + Rotation):
+dog_slice_000.png -> Position 0 (Row 0, Col 0) Rotate 0° to restore
+dog_slice_001.png -> Position 9 (Row 2, Col 1) Rotate 90° to restore
+dog_slice_002.png -> Position 14 (Row 3, Col 2) Rotate 180° to restore
+dog_slice_003.png -> Position 10 (Row 2, Col 2) Rotate 270° to restore
+dog_slice_004.png -> Position 2 (Row 0, Col 2) Rotate 270° to restore
+dog_slice_005.png -> Position 11 (Row 2, Col 3) Rotate 270° to restore
+dog_slice_006.png -> Position 7 (Row 1, Col 3) Rotate 270° to restore
+dog_slice_007.png -> Position 13 (Row 3, Col 1) Rotate 90° to restore
+dog_slice_008.png -> Position 6 (Row 1, Col 2) Rotate 180° to restore
+dog_slice_009.png -> Position 1 (Row 0, Col 1) Rotate 270° to restore
+dog_slice_010.png -> Position 3 (Row 0, Col 3) Rotate 0° to restore
+dog_slice_011.png -> Position 5 (Row 1, Col 1) Rotate 0° to restore
+dog_slice_012.png -> Position 8 (Row 2, Col 0) Rotate 180° to restore
+dog_slice_013.png -> Position 4 (Row 1, Col 0) Rotate 0° to restore
+dog_slice_014.png -> Position 15 (Row 3, Col 3) Rotate 90° to restore
+dog_slice_015.png -> Position 12 (Row 3, Col 0) Rotate 270° to restore
+
+----------------------------------------------------------------------
+ORIGINAL COORDINATES:
+dog_slice_000.png: (0, 0) -> (256, 256) [Rotated 0°]
+dog_slice_009.png: (256, 0) -> (512, 256) [Rotated 90°]
+dog_slice_004.png: (512, 0) -> (768, 256) [Rotated 90°]
+dog_slice_010.png: (768, 0) -> (1024, 256) [Rotated 0°]
+dog_slice_013.png: (0, 256) -> (256, 512) [Rotated 0°]
+dog_slice_011.png: (256, 256) -> (512, 512) [Rotated 0°]
+dog_slice_008.png: (512, 256) -> (768, 512) [Rotated 180°]
+dog_slice_006.png: (768, 256) -> (1024, 512) [Rotated 90°]
+dog_slice_012.png: (0, 512) -> (256, 768) [Rotated 180°]
+dog_slice_001.png: (256, 512) -> (512, 768) [Rotated 270°]
+dog_slice_003.png: (512, 512) -> (768, 768) [Rotated 90°]
+dog_slice_005.png: (768, 512) -> (1024, 768) [Rotated 90°]
+dog_slice_015.png: (0, 768) -> (256, 1024) [Rotated 90°]
+dog_slice_007.png: (256, 768) -> (512, 1024) [Rotated 270°]
+dog_slice_002.png: (512, 768) -> (768, 1024) [Rotated 180°]
+dog_slice_014.png: (768, 768) -> (1024, 1024) [Rotated 270°]

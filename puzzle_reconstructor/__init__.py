@@ -1,1 +1,1 @@
-# Inicialización del módulo puzzle_reconstructor
+# Initialization of the puzzle_reconstructor module

@@ -1,0 +1,65 @@
+Información de recomposición para: pinguino.jpeg
+Imagen original: 851x851
+División: 4x4 (16 trozos)
+Tamaño de cada trozo: 212x212
+NOTA: Los trozos fueron guardados en ORDEN ALEATORIO
+--------------------------------------------------
+
+
+ORDEN CORRECTO PARA RECOMPOSICIÓN:
+Pos.Orig | Archivo Guardado    | Fila | Col | Índice Guardado
+-----------------------------------------------------------------
+       0 | pinguino_slice_009.png |    0 |   0 |              9
+       1 | pinguino_slice_007.png |    0 |   1 |              7
+       2 | pinguino_slice_010.png |    0 |   2 |             10
+       3 | pinguino_slice_015.png |    0 |   3 |             15
+       4 | pinguino_slice_001.png |    1 |   0 |              1
+       5 | pinguino_slice_008.png |    1 |   1 |              8
+       6 | pinguino_slice_000.png |    1 |   2 |              0
+       7 | pinguino_slice_013.png |    1 |   3 |             13
+       8 | pinguino_slice_006.png |    2 |   0 |              6
+       9 | pinguino_slice_005.png |    2 |   1 |              5
+      10 | pinguino_slice_014.png |    2 |   2 |             14
+      11 | pinguino_slice_012.png |    2 |   3 |             12
+      12 | pinguino_slice_004.png |    3 |   0 |              4
+      13 | pinguino_slice_002.png |    3 |   1 |              2
+      14 | pinguino_slice_011.png |    3 |   2 |             11
+      15 | pinguino_slice_003.png |    3 |   3 |              3
+
+--------------------------------------------------
+MAPEO DE ARCHIVOS (Archivo -> Posición Original):
+pinguino_slice_000.png -> Posición original 6 (Fila 1, Col 2)
+pinguino_slice_001.png -> Posición original 4 (Fila 1, Col 0)
+pinguino_slice_002.png -> Posición original 13 (Fila 3, Col 1)
+pinguino_slice_003.png -> Posición original 15 (Fila 3, Col 3)
+pinguino_slice_004.png -> Posición original 12 (Fila 3, Col 0)
+pinguino_slice_005.png -> Posición original 9 (Fila 2, Col 1)
+pinguino_slice_006.png -> Posición original 8 (Fila 2, Col 0)
+pinguino_slice_007.png -> Posición original 1 (Fila 0, Col 1)
+pinguino_slice_008.png -> Posición original 5 (Fila 1, Col 1)
+pinguino_slice_009.png -> Posición original 0 (Fila 0, Col 0)
+pinguino_slice_010.png -> Posición original 2 (Fila 0, Col 2)
+pinguino_slice_011.png -> Posición original 14 (Fila 3, Col 2)
+pinguino_slice_012.png -> Posición original 11 (Fila 2, Col 3)
+pinguino_slice_013.png -> Posición original 7 (Fila 1, Col 3)
+pinguino_slice_014.png -> Posición original 10 (Fila 2, Col 2)
+pinguino_slice_015.png -> Posición original 3 (Fila 0, Col 3)
+
+--------------------------------------------------
+COORDENADAS ORIGINALES:
+pinguino_slice_009.png: (0, 0) -> (212, 212)
+pinguino_slice_007.png: (212, 0) -> (424, 212)
+pinguino_slice_010.png: (424, 0) -> (636, 212)
+pinguino_slice_015.png: (636, 0) -> (848, 212)
+pinguino_slice_001.png: (0, 212) -> (212, 424)
+pinguino_slice_008.png: (212, 212) -> (424, 424)
+pinguino_slice_000.png: (424, 212) -> (636, 424)
+pinguino_slice_013.png: (636, 212) -> (848, 424)
+pinguino_slice_006.png: (0, 424) -> (212, 636)
+pinguino_slice_005.png: (212, 424) -> (424, 636)
+pinguino_slice_014.png: (424, 424) -> (636, 636)
+pinguino_slice_012.png: (636, 424) -> (848, 636)
+pinguino_slice_004.png: (0, 636) -> (212, 848)
+pinguino_slice_002.png: (212, 636) -> (424, 848)
+pinguino_slice_011.png: (424, 636) -> (636, 848)
+pinguino_slice_003.png: (636, 636) -> (848, 848)

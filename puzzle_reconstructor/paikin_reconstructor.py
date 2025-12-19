@@ -9,21 +9,21 @@ sys.path.insert(0, os.path.dirname(__file__))
 from puzzle_base import PuzzleSolverBase, ImageSlice
 
 class PaikinSolver(PuzzleSolverBase):
-    def __init__(self, sliced_dir: str, output_dir: str, image_name: str = "", border_width: int = 30):
+    def __init__(self, sliced_dir: str, output_dir: str, image_name: str = "", border_width: int = 10):
         super().__init__(sliced_dir, output_dir, image_name, border_width)
         self._cost_cache = {}
         self._compatibility_matrix = None
         self._edge_scores = {}
         
-        # Parámetros
-        self.feature_border_width = 4
+        # Parameters
+        self.feature_border_width = border_width  # Use configurable border_width
         self.compatibility_top_k = 15
         self.multi_border_width = 3
         
-        # Umbral de actividad del gradiente para considerar que es fondo plano
+        # Gradient activity threshold to consider an area as flat background
         self.bg_activity_threshold = 0.03
 
-        # Pesos base para objetos (se ajustan dinámicamente)
+        # Base weights for objects (adjusted dynamically)
         self.weight_color = 0.4
         self.weight_gradient = 0.6
 
@@ -31,42 +31,42 @@ class PaikinSolver(PuzzleSolverBase):
     # ...
 
     # =============================
-    #   DETECCIÓN DE BORDES EXTERNOS (Relajada)
+    #   EXTERNAL EDGE DETECTION (Relaxed)
     # =============================
     def detect_puzzle_edges(self):
-        # En imágenes con mucho fondo, la detección automática de bordes externos 
-        # suele fallar y marcar piezas internas blancas como bordes. La desactivamos.
-        print(f"[{self.__class__.__name__}] Detección de bordes externos relajada por seguridad.")
+        # In images with large background areas, automatic external edge detection
+        # often fails and marks internal white pieces as edges. Disable it here.
+        print(f"[{self.__class__.__name__}] External edge detection relaxed for safety.")
         for i, slice_obj in enumerate(self.slices):
-             self._edge_scores[i] = {'top': False, 'bottom': False, 'left': False, 'right': False}
+            self._edge_scores[i] = {'top': False, 'bottom': False, 'left': False, 'right': False}
 
     def find_corner_piece(self, corner_type: str = 'top_left'):
-        # Al no usar detección de bordes, empezamos por la pieza 0. 
-        # El algoritmo Best-First corregirá la posición.
+        # Without using edge detection, start from piece 0.
+        # The Best-First algorithm will correct placement.
         return 0
 
     # =============================
-    #   FEATURES (Simplificadas)
+    #   FEATURES (Simplified)
     # =============================
     def extract_features(self, img: np.ndarray):
         """
-        Solo usamos LAB (color) y Magnitud de Gradiente (actividad).
-        Eliminamos texturas y otros espacios que añaden ruido en fondos planos.
+        Use only LAB (color) and Gradient Magnitude (activity).
+        Remove textures and other channels that add noise on flat backgrounds.
         """
         h, w = img.shape[:2]
         
-        # 1. Espacio LAB normalizado [0,1]
+        # 1. LAB color space normalized to [0,1]
         lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB).astype(np.float32) / 255.0
         
-        # 2. Magnitud de Gradiente (Scharr) normalizada [0,1]
+        # 2. Gradient Magnitude (Scharr) normalized to [0,1]
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY).astype(np.float32) / 255.0
         g_x = cv2.Scharr(gray, cv2.CV_32F, 1, 0)
         g_y = cv2.Scharr(gray, cv2.CV_32F, 0, 1)
         grad_mag = cv2.magnitude(g_x, g_y)
-        # Recortamos valores extremos para evitar que un punto brillante domine
+        # Clip extreme values to avoid a bright spot dominating
         grad_mag = np.clip(grad_mag, 0, 1.0) 
         
-        # Combinar: 3 canales LAB + 1 canal Magnitud = 4 canales
+        # Combine: 3 LAB channels + 1 magnitude channel = 4 channels
         combined = np.dstack([
             lab,                # Canales 0, 1, 2
             grad_mag[..., None] # Canal 3
@@ -82,7 +82,7 @@ class PaikinSolver(PuzzleSolverBase):
         }
 
     # =============================
-    #   COSTE DE COMPATIBILIDAD (Dinámico)
+    #   COMPATIBILITY COST (Dynamic)
     # =============================
     def calculate_cost(self, idx_a: int, idx_b: int, direction: str) -> float:
         cache_key = (idx_a, idx_b, direction)
@@ -101,47 +101,47 @@ class PaikinSolver(PuzzleSolverBase):
             edge_a = feats_a['bottom'][-max_h:, :, :]
             edge_b = feats_b['top'][:max_h, :, :]
         
-        # Flatten [N píxeles, 4 canales]
+        # Flatten [N pixels, 4 channels]
         edge_a_flat = edge_a.reshape(-1, edge_a.shape[-1])
         edge_b_flat = edge_b.reshape(-1, edge_b.shape[-1])
         
         # --- DYNAMIC LOGIC ---
         
-        # 1. Measure "Activity" using magnitude channel (index 3)
+        # 1. Measure "activity" using the magnitude channel (index 3)
         act_a = np.mean(edge_a_flat[:, 3])
         act_b = np.mean(edge_b_flat[:, 3])
         
         is_bg_a = act_a < self.bg_activity_threshold
         is_bg_b = act_b < self.bg_activity_threshold
         
-        # 2. Calcular diferencias base
-        # Diferencia de Color (Canales 0,1,2 - LAB)
+        # 2. Compute base differences
+        # Color difference (Channels 0,1,2 - LAB)
         diff_color = np.linalg.norm(edge_a_flat[:, :3] - edge_b_flat[:, :3], axis=1).mean()
-        # Diferencia de Gradiente (Canal 3 - Magnitud)
+        # Gradient difference (Channel 3 - Magnitude)
         diff_grad = np.abs(edge_a_flat[:, 3] - edge_b_flat[:, 3]).mean()
         
         cost = 0.0
         
-        # CASO 1: AMBOS SON FONDO (Blanco con Blanco)
+        # CASE 1: BOTH ARE BACKGROUND (background with background)
         if is_bg_a and is_bg_b:
-            # Solo importa la continuidad del color. El gradiente es ruido.
-            cost = diff_color * 2.0 # Peso 100% al color
+            # Only color continuity matters. Gradient is noise.
+            cost = diff_color * 2.0 # 100% weight to color
             
-        # CASO 2: MIXTO (Fondo con Objeto)
+        # CASE 2: MIXED (background with object)
         elif is_bg_a != is_bg_b:
-            # Penalización alta.
+            # High penalty.
             cost = 5.0 + diff_color + diff_grad
             
-        # CASO 3: AMBOS SON OBJETOS (Bordes de manzana)
+        # CASE 3: BOTH ARE OBJECTS
         else:
-            # Combinación ponderada de color y forma del gradiente.
+            # Weighted combination of color and gradient shape.
             cost = (self.weight_color * diff_color) + (self.weight_gradient * diff_grad)
 
         self._cost_cache[cache_key] = cost
         return cost
 
-    # (NOTA IMPORTANTE: Los métodos restantes de la clase PaikinSolver original:
-    #  build_compatibility_matrix, get_best_candidates, solve, _evaluate_slot_fit, 
-    #  _add_candidates_for_slot, save_results y el bloque if __name__ 
-    #  DEBEN MANTENERSE EXACTAMENTE IGUAL que en el código que proporcionaste al principio.
-    #  La lógica de ensamblado no cambia, solo cómo se calcula el coste de unión).
+    # (IMPORTANT NOTE: The remaining methods of the original PaikinSolver class:
+    #  build_compatibility_matrix, get_best_candidates, solve, _evaluate_slot_fit,
+    #  _add_candidates_for_slot, save_results and the if __name__ block
+    #  MUST REMAIN EXACTLY THE SAME as in the original code you provided.
+    #  The assembly logic does not change, only how the join cost is calculated.)

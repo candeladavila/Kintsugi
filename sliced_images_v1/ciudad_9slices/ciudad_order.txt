@@ -1,0 +1,44 @@
+Información de recomposición para: ciudad.jpeg
+Imagen original: 3024x3024
+División: 3x3 (9 trozos)
+Tamaño de cada trozo: 1008x1008
+NOTA: Los trozos fueron guardados en ORDEN ALEATORIO
+--------------------------------------------------
+
+
+ORDEN CORRECTO PARA RECOMPOSICIÓN:
+Pos.Orig | Archivo Guardado    | Fila | Col | Índice Guardado
+-----------------------------------------------------------------
+       0 | ciudad_slice_006.png |    0 |   0 |              6
+       1 | ciudad_slice_004.png |    0 |   1 |              4
+       2 | ciudad_slice_008.png |    0 |   2 |              8
+       3 | ciudad_slice_002.png |    1 |   0 |              2
+       4 | ciudad_slice_007.png |    1 |   1 |              7
+       5 | ciudad_slice_005.png |    1 |   2 |              5
+       6 | ciudad_slice_003.png |    2 |   0 |              3
+       7 | ciudad_slice_000.png |    2 |   1 |              0
+       8 | ciudad_slice_001.png |    2 |   2 |              1
+
+--------------------------------------------------
+MAPEO DE ARCHIVOS (Archivo -> Posición Original):
+ciudad_slice_000.png -> Posición original 7 (Fila 2, Col 1)
+ciudad_slice_001.png -> Posición original 8 (Fila 2, Col 2)
+ciudad_slice_002.png -> Posición original 3 (Fila 1, Col 0)
+ciudad_slice_003.png -> Posición original 6 (Fila 2, Col 0)
+ciudad_slice_004.png -> Posición original 1 (Fila 0, Col 1)
+ciudad_slice_005.png -> Posición original 5 (Fila 1, Col 2)
+ciudad_slice_006.png -> Posición original 0 (Fila 0, Col 0)
+ciudad_slice_007.png -> Posición original 4 (Fila 1, Col 1)
+ciudad_slice_008.png -> Posición original 2 (Fila 0, Col 2)
+
+--------------------------------------------------
+COORDENADAS ORIGINALES:
+ciudad_slice_006.png: (0, 0) -> (1008, 1008)
+ciudad_slice_004.png: (1008, 0) -> (2016, 1008)
+ciudad_slice_008.png: (2016, 0) -> (3024, 1008)
+ciudad_slice_002.png: (0, 1008) -> (1008, 2016)
+ciudad_slice_007.png: (1008, 1008) -> (2016, 2016)
+ciudad_slice_005.png: (2016, 1008) -> (3024, 2016)
+ciudad_slice_003.png: (0, 2016) -> (1008, 3024)
+ciudad_slice_000.png: (1008, 2016) -> (2016, 3024)
+ciudad_slice_001.png: (2016, 2016) -> (3024, 3024)

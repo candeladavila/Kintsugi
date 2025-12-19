@@ -1,0 +1,65 @@
+Información de recomposición para: dog.jpg
+Imagen original: 1024x1024
+División: 4x4 (16 trozos)
+Tamaño de cada trozo: 256x256
+NOTA: Los trozos fueron guardados en ORDEN ALEATORIO
+--------------------------------------------------
+
+
+ORDEN CORRECTO PARA RECOMPOSICIÓN:
+Pos.Orig | Archivo Guardado    | Fila | Col | Índice Guardado
+-----------------------------------------------------------------
+       0 | dog_slice_009.png  |    0 |   0 |              9
+       1 | dog_slice_003.png  |    0 |   1 |              3
+       2 | dog_slice_005.png  |    0 |   2 |              5
+       3 | dog_slice_002.png  |    0 |   3 |              2
+       4 | dog_slice_007.png  |    1 |   0 |              7
+       5 | dog_slice_010.png  |    1 |   1 |             10
+       6 | dog_slice_012.png  |    1 |   2 |             12
+       7 | dog_slice_008.png  |    1 |   3 |              8
+       8 | dog_slice_015.png  |    2 |   0 |             15
+       9 | dog_slice_011.png  |    2 |   1 |             11
+      10 | dog_slice_006.png  |    2 |   2 |              6
+      11 | dog_slice_013.png  |    2 |   3 |             13
+      12 | dog_slice_001.png  |    3 |   0 |              1
+      13 | dog_slice_014.png  |    3 |   1 |             14
+      14 | dog_slice_000.png  |    3 |   2 |              0
+      15 | dog_slice_004.png  |    3 |   3 |              4
+
+--------------------------------------------------
+MAPEO DE ARCHIVOS (Archivo -> Posición Original):
+dog_slice_000.png -> Posición original 14 (Fila 3, Col 2)
+dog_slice_001.png -> Posición original 12 (Fila 3, Col 0)
+dog_slice_002.png -> Posición original 3 (Fila 0, Col 3)
+dog_slice_003.png -> Posición original 1 (Fila 0, Col 1)
+dog_slice_004.png -> Posición original 15 (Fila 3, Col 3)
+dog_slice_005.png -> Posición original 2 (Fila 0, Col 2)
+dog_slice_006.png -> Posición original 10 (Fila 2, Col 2)
+dog_slice_007.png -> Posición original 4 (Fila 1, Col 0)
+dog_slice_008.png -> Posición original 7 (Fila 1, Col 3)
+dog_slice_009.png -> Posición original 0 (Fila 0, Col 0)
+dog_slice_010.png -> Posición original 5 (Fila 1, Col 1)
+dog_slice_011.png -> Posición original 9 (Fila 2, Col 1)
+dog_slice_012.png -> Posición original 6 (Fila 1, Col 2)
+dog_slice_013.png -> Posición original 11 (Fila 2, Col 3)
+dog_slice_014.png -> Posición original 13 (Fila 3, Col 1)
+dog_slice_015.png -> Posición original 8 (Fila 2, Col 0)
+
+--------------------------------------------------
+COORDENADAS ORIGINALES:
+dog_slice_009.png: (0, 0) -> (256, 256)
+dog_slice_003.png: (256, 0) -> (512, 256)
+dog_slice_005.png: (512, 0) -> (768, 256)
+dog_slice_002.png: (768, 0) -> (1024, 256)
+dog_slice_007.png: (0, 256) -> (256, 512)
+dog_slice_010.png: (256, 256) -> (512, 512)
+dog_slice_012.png: (512, 256) -> (768, 512)
+dog_slice_008.png: (768, 256) -> (1024, 512)
+dog_slice_015.png: (0, 512) -> (256, 768)
+dog_slice_011.png: (256, 512) -> (512, 768)
+dog_slice_006.png: (512, 512) -> (768, 768)
+dog_slice_013.png: (768, 512) -> (1024, 768)
+dog_slice_001.png: (0, 768) -> (256, 1024)
+dog_slice_014.png: (256, 768) -> (512, 1024)
+dog_slice_000.png: (512, 768) -> (768, 1024)
+dog_slice_004.png: (768, 768) -> (1024, 1024)

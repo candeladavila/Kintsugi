@@ -1,0 +1,44 @@
+Información de recomposición para: pinguino.jpeg
+Imagen original: 851x851
+División: 3x3 (9 trozos)
+Tamaño de cada trozo: 283x283
+NOTA: Los trozos fueron guardados en ORDEN ALEATORIO
+--------------------------------------------------
+
+
+ORDEN CORRECTO PARA RECOMPOSICIÓN:
+Pos.Orig | Archivo Guardado    | Fila | Col | Índice Guardado
+-----------------------------------------------------------------
+       0 | pinguino_slice_004.png |    0 |   0 |              4
+       1 | pinguino_slice_001.png |    0 |   1 |              1
+       2 | pinguino_slice_002.png |    0 |   2 |              2
+       3 | pinguino_slice_008.png |    1 |   0 |              8
+       4 | pinguino_slice_005.png |    1 |   1 |              5
+       5 | pinguino_slice_003.png |    1 |   2 |              3
+       6 | pinguino_slice_007.png |    2 |   0 |              7
+       7 | pinguino_slice_000.png |    2 |   1 |              0
+       8 | pinguino_slice_006.png |    2 |   2 |              6
+
+--------------------------------------------------
+MAPEO DE ARCHIVOS (Archivo -> Posición Original):
+pinguino_slice_000.png -> Posición original 7 (Fila 2, Col 1)
+pinguino_slice_001.png -> Posición original 1 (Fila 0, Col 1)
+pinguino_slice_002.png -> Posición original 2 (Fila 0, Col 2)
+pinguino_slice_003.png -> Posición original 5 (Fila 1, Col 2)
+pinguino_slice_004.png -> Posición original 0 (Fila 0, Col 0)
+pinguino_slice_005.png -> Posición original 4 (Fila 1, Col 1)
+pinguino_slice_006.png -> Posición original 8 (Fila 2, Col 2)
+pinguino_slice_007.png -> Posición original 6 (Fila 2, Col 0)
+pinguino_slice_008.png -> Posición original 3 (Fila 1, Col 0)
+
+--------------------------------------------------
+COORDENADAS ORIGINALES:
+pinguino_slice_004.png: (0, 0) -> (283, 283)
+pinguino_slice_001.png: (283, 0) -> (566, 283)
+pinguino_slice_002.png: (566, 0) -> (849, 283)
+pinguino_slice_008.png: (0, 283) -> (283, 566)
+pinguino_slice_005.png: (283, 283) -> (566, 566)
+pinguino_slice_003.png: (566, 283) -> (849, 566)
+pinguino_slice_007.png: (0, 566) -> (283, 849)
+pinguino_slice_000.png: (283, 566) -> (566, 849)
+pinguino_slice_006.png: (566, 566) -> (849, 849)

@@ -19,218 +19,283 @@ from puzzle_base_v2 import PuzzleSolverBaseV2, ImageSliceV2, rotate_image, ROTAT
 class ColorSolverV2(PuzzleSolverBaseV2):
     """
     Color-based solver with rotation support.
-    
-    Uses LAB color space for perceptually accurate color matching
-    while testing all possible rotation combinations.
-    """
-    
-    def __init__(self, sliced_dir: str, output_dir: str, image_name: str = "", border_width: int = 10):
-        super().__init__(sliced_dir, output_dir, image_name, border_width)
-        self._cost_cache = {}
-    
-    def extract_features_rotated(self, img: np.ndarray, rotation: int) -> Dict[str, np.ndarray]:
-        """
-        Extracts LAB color features from a rotated version of the image.
-        """
-        rotated = rotate_image(img, rotation)
-        lab = cv2.cvtColor(rotated, cv2.COLOR_BGR2LAB).astype(np.float32)
-        w_b = self.border_width
-        
-        return {
-            'top': lab[0:w_b, :, :],
-            'bottom': lab[-w_b:, :, :],
-            'left': lab[:, 0:w_b, :],
-            'right': lab[:, -w_b:, :]
-        }
 
-    def calculate_cost(self, idx_a: int, idx_b: int, direction: str,
-                       rotation_a: int = 0, rotation_b: int = 0) -> float:
+    Uses LAB color space for better perceptual similarity comparisons.
+    """
+
+    def __init__(
+        self,
+        sliced_dir: str,
+        output_dir: str = "output_images",
+        image_name: str = "",
+        border_width: int = 10,
+    ):
+        # Support old single-argument usage by allowing output_dir to be omitted.
+        super().__init__(sliced_dir, output_dir, image_name, border_width)
+        self._lab_cache: Dict[Tuple[int, int], np.ndarray] = {}
+        self._cost_cache: Dict[Tuple[int, int, str, int, int], float] = {}
+
+        # Full compatibility cache:
+        # {(idx_a, rot_a, idx_b, rot_b, direction): cost}
+        self.compatibility_cache: Dict[Tuple[int, int, int, int, str], float] = {}
+
+    def _get_lab(self, idx: int, rotation: int = 0) -> np.ndarray:
+        """
+        Returns the LAB version of the slice image, with rotation applied.
+        Uses caching for performance.
+        """
+        cache_key = (idx, rotation)
+        if cache_key in self._lab_cache:
+            return self._lab_cache[cache_key]
+
+        img = self.slices[idx].original_image
+        img_rot = rotate_image(img, rotation)
+
+        lab = cv2.cvtColor(img_rot, cv2.COLOR_BGR2LAB)
+        self._lab_cache[cache_key] = lab
+        return lab
+
+    def calculate_cost(
+        self,
+        idx_a: int,
+        idx_b: int,
+        direction: str,
+        rotation_a: int = 0,
+        rotation_b: int = 0,
+    ) -> float:
         """
         Calculates the color distance between contact borders of two pieces.
-        
+
         Args:
             idx_a: Index of piece A
             idx_b: Index of piece B
             direction: 'horizontal' (A left of B) or 'vertical' (A above B)
             rotation_a: Rotation applied to piece A
             rotation_b: Rotation applied to piece B
-            
+
         Returns:
             Cost value (lower = better match)
         """
         cache_key = (idx_a, idx_b, direction, rotation_a, rotation_b)
         if cache_key in self._cost_cache:
             return self._cost_cache[cache_key]
-        
-        # Extract features with rotations
-        feats_a = self.extract_features_rotated(self.slices[idx_a].original_image, rotation_a)
-        feats_b = self.extract_features_rotated(self.slices[idx_b].original_image, rotation_b)
-        
-        if direction == 'horizontal':
-            edge_a = feats_a['right'][:, -1]  # Right edge of A
-            edge_b = feats_b['left'][:, 0]    # Left edge of B
-        else:  # vertical
-            edge_a = feats_a['bottom'][-1, :]  # Bottom edge of A
-            edge_b = feats_b['top'][0, :]      # Top edge of B
-        
-        # Euclidean distance between LAB color vectors
+
+        lab_a = self._get_lab(idx_a, rotation_a)
+        lab_b = self._get_lab(idx_b, rotation_b)
+
+        if direction == "horizontal":
+            # Right edge of A vs left edge of B
+            edge_a = lab_a[:, -1, :].astype(np.float32)
+            edge_b = lab_b[:, 0, :].astype(np.float32)
+        else:
+            # Bottom edge of A vs top edge of B
+            edge_a = lab_a[-1, :, :].astype(np.float32)
+            edge_b = lab_b[0, :, :].astype(np.float32)
+
+        # Euclidean distance in LAB
         diff = np.linalg.norm(edge_a - edge_b, axis=1)
-        cost = np.mean(diff)
-        
+        cost = float(np.mean(diff))
+
         self._cost_cache[cache_key] = cost
         return cost
 
-    def find_top_left_corner(self, n_slices: int) -> Tuple[int, int]:
+    def build_compatibility_matrix(self):
         """
-        Finds the piece and rotation that is probably the top-left corner.
-        Uses color uniformity at top and left edges as indicator.
-        """
-        max_min_cost = -1
-        best_candidate = 0
-        best_rotation = 0
+        Builds a full compatibility cache between all pieces for all rotation combinations.
 
-        for i in range(n_slices):
-            for rotation in ROTATIONS:
-                # Calculate minimum costs from left and top with this rotation
-                costs_left = []
-                costs_top = []
-                
-                for j in range(n_slices):
-                    if i != j:
-                        costs_left.append(self.calculate_cost(j, i, 'horizontal', 0, rotation))
-                        costs_top.append(self.calculate_cost(j, i, 'vertical', 0, rotation))
-                
-                min_left = min(costs_left) if costs_left else 0
-                min_top = min(costs_top) if costs_top else 0
-                
-                # Higher score = worse match = more likely to be corner
-                corner_score = min_left + min_top
-                
-                if corner_score > max_min_cost:
-                    max_min_cost = corner_score
-                    best_candidate = i
-                    best_rotation = rotation
-        
-        return best_candidate, best_rotation
+        Structure: {(idx_a, rot_a, idx_b, rot_b, direction): cost}
+        """
+        n = len(self.slices)
+        print(f"[{self.__class__.__name__}] Building compatibility cache with rotations...")
+        print(f"  Analyzing {n} pieces...")
+        print(f"  Testing {len(ROTATIONS)} rotations per piece...")
+
+        self.compatibility_cache = {}
+
+        for i in range(n):
+            for j in range(n):
+                if i == j:
+                    continue
+
+                for rot_a in ROTATIONS:
+                    for rot_b in ROTATIONS:
+                        # Horizontal compatibility
+                        c_h = self.calculate_cost(i, j, "horizontal", rot_a, rot_b)
+                        self.compatibility_cache[(i, rot_a, j, rot_b, "horizontal")] = c_h
+
+                        # Vertical compatibility
+                        c_v = self.calculate_cost(i, j, "vertical", rot_a, rot_b)
+                        self.compatibility_cache[(i, rot_a, j, rot_b, "vertical")] = c_v
+
+            progress = ((i + 1) / n) * 100
+            if (i + 1) % max(1, n // 10) == 0:
+                print(f"  Progress: {progress:.1f}%")
+
+        print("  ✓ Compatibility cache completed\n")
+
+    def find_best_match(
+        self,
+        piece_idx: int,
+        piece_rotation: int,
+        direction: str,
+        used_indices: set,
+    ) -> Tuple[int, int, float]:
+        """
+        Finds the best piece and rotation to pair with a given piece (using the precomputed cache).
+
+        Returns:
+            Tuple (best_index, best_rotation, cost)
+        """
+        best_idx = -1
+        best_rotation = 0
+        best_cost = float("inf")
+        n = len(self.slices)
+
+        for j in range(n):
+            if j in used_indices or j == piece_idx:
+                continue
+
+            for rot_b in ROTATIONS:
+                key = (piece_idx, piece_rotation, j, rot_b, direction)
+                c = self.compatibility_cache.get(key)
+                if c is None:
+                    # Safe fallback (should not happen if cache is built)
+                    c = self.calculate_cost(piece_idx, j, direction, piece_rotation, rot_b)
+
+                if c < best_cost:
+                    best_cost = c
+                    best_idx = j
+                    best_rotation = rot_b
+
+        return best_idx, best_rotation, float(best_cost)
 
     def solve(self):
         """
-        Greedy algorithm to reconstruct the puzzle with rotation support.
+        Main solving method with rotation support.
         """
         n_slices = len(self.slices)
         side = int(math.sqrt(n_slices))
         rows, cols = side, side
-        
+
         print(f"\n{'='*60}")
-        print(f"COLOR RECONSTRUCTOR V2 - With Rotation Support")
+        print("COLOR RECONSTRUCTOR V2 - With Rotation Support")
         print(f"{'='*60}")
         print(f"Pieces: {n_slices} ({rows}x{cols})")
-        print(f"Color space: LAB")
-        print(f"Rotations: 0°, 90°, 180°, 270°")
+        print("Color space: LAB")
+        print("Rotations: 0°, 90°, 180°, 270°")
         print(f"{'='*60}\n")
-        
+
+        # Step 1: Build compatibility cache
+        self.build_compatibility_matrix()
+
+        # Step 2: Greedy reconstruction
         grid = [[None for _ in range(cols)] for _ in range(rows)]
         used_indices = set()
-        
-        # 1. Find corner
-        print("Searching for top-left corner (with rotation)...")
-        start_idx = next((i for i, slc in enumerate(self.slices)
-                        if slc.filename.endswith("_slice_000.png")), None)
 
+        print(f"[{self.__class__.__name__}] Starting greedy reconstruction with rotations...")
+
+        # Fixed top-left corner (no heuristic / no fallback)
+        start_idx = next(
+            (i for i, slc in enumerate(self.slices) if slc.filename.endswith("_slice_000.png")),
+            None,
+        )
         if start_idx is None:
-            start_idx, start_rotation = self.find_top_left_corner(n_slices)
-        else:
-            start_rotation = 0
+            raise ValueError(
+                "No piece named '*_slice_000.png' was found. "
+                "To always fix the top-left corner, make sure that piece exists."
+            )
 
+        start_rotation = 0
         self.slices[start_idx].set_rotation(start_rotation)
         grid[0][0] = self.slices[start_idx]
         used_indices.add(start_idx)
-        
-        # 2. Fill grid
+
+        # Build grid
         for r in range(rows):
             for c in range(cols):
-                if r == 0 and c == 0:
+                if grid[r][c] is not None:
                     continue
-                
-                best_idx = -1
-                best_rotation = 0
-                min_cost = float('inf')
-                
-                for idx in range(n_slices):
-                    if idx in used_indices:
-                        continue
-                    
-                    # Try all rotations
-                    for rotation in ROTATIONS:
-                        cost = 0
-                        count = 0
-                        
-                        # Compare with left neighbor
-                        if c > 0:
-                            left_slice = grid[r][c-1]
-                            cost += self.calculate_cost(
-                                left_slice.id, idx, 'horizontal',
-                                left_slice.current_rotation, rotation
-                            )
-                            count += 1
-                        
-                        # Compare with top neighbor
-                        if r > 0:
-                            top_slice = grid[r-1][c]
-                            cost += self.calculate_cost(
-                                top_slice.id, idx, 'vertical',
-                                top_slice.current_rotation, rotation
-                            )
-                            count += 1
-                        
-                        avg_cost = cost / count if count > 0 else float('inf')
-                        
-                        if avg_cost < min_cost:
-                            min_cost = avg_cost
-                            best_idx = idx
-                            best_rotation = rotation
-                
-                # Safety fallback
-                if best_idx == -1:
-                    best_idx = next(i for i in range(n_slices) if i not in used_indices)
-                    best_rotation = 0
-                
-                self.slices[best_idx].set_rotation(best_rotation)
-                grid[r][c] = self.slices[best_idx]
-                used_indices.add(best_idx)
-                
-                progress = len(used_indices) / n_slices * 100
-                print(f"  [{progress:5.1f}%] Position ({r},{c}): piece #{best_idx} rot {best_rotation}° (cost: {min_cost:.2f})")
-        
-        print(f"\n✓ Reconstruction completed\n")
-        self.save_results(grid, rows, cols)
-        
-        print(f"{'='*60}")
-        print(f"✓ Process completed")
-        print(f"{'='*60}\n")
+
+                candidates = []
+
+                # If there's a piece to the left
+                if c > 0 and grid[r][c - 1] is not None:
+                    left_piece = grid[r][c - 1]
+                    left_idx = self.slices.index(left_piece)
+                    best_idx, best_rot, cost = self.find_best_match(
+                        left_idx,
+                        left_piece.current_rotation,
+                        "horizontal",
+                        used_indices,
+                    )
+                    if best_idx >= 0:
+                        candidates.append((best_idx, best_rot, cost, "h"))
+
+                # If there's a piece above
+                if r > 0 and grid[r - 1][c] is not None:
+                    top_piece = grid[r - 1][c]
+                    top_idx = self.slices.index(top_piece)
+                    best_idx, best_rot, cost = self.find_best_match(
+                        top_idx,
+                        top_piece.current_rotation,
+                        "vertical",
+                        used_indices,
+                    )
+                    if best_idx >= 0:
+                        candidates.append((best_idx, best_rot, cost, "v"))
+
+                if candidates:
+                    # Sort by cost and pick best
+                    candidates.sort(key=lambda x: x[2])
+                    best_idx, best_rot, best_cost, _ = candidates[0]
+
+                    self.slices[best_idx].set_rotation(best_rot)
+                    grid[r][c] = self.slices[best_idx]
+                    used_indices.add(best_idx)
+
+                    progress = len(used_indices) / len(self.slices) * 100
+                    print(
+                        f"  [{progress:5.1f}%] Position ({r},{c}): piece #{best_idx} "
+                        f"rot {best_rot}° (cost: {best_cost:.2f})"
+                    )
+                else:
+                    # Fallback: place any remaining piece (rotation 0)
+                    for idx in range(len(self.slices)):
+                        if idx not in used_indices:
+                            self.slices[idx].set_rotation(0)
+                            grid[r][c] = self.slices[idx]
+                            used_indices.add(idx)
+                            break
+
+        print(f"\n  ✓ Reconstruction completed: {len(used_indices)}/{len(self.slices)} pieces\n")
+        # Save results using base class helper
+        try:
+            self.save_results(grid, rows, cols)
+        except Exception:
+            # If saving fails, continue to return grid for debugging
+            pass
+
+        return grid
 
 
-def main():
+if __name__ == "__main__":
     import argparse
-    
-    parser = argparse.ArgumentParser(description='Color Reconstructor V2 - With Rotation Support')
-    parser.add_argument('image_name', nargs='?', help='Base name of the image')
+
+    parser = argparse.ArgumentParser(description='Color Reconstructor V2 - With Rotation')
+    parser.add_argument('image_name', nargs='?', help='Base name of the image (without _slice_XXX.png)')
     parser.add_argument('--sliced-dir', default='sliced_images_v2', help='Directory with sliced pieces')
-    parser.add_argument('--output', '-o', default='output_images_v2', help='Output directory')
-    
+    parser.add_argument('--output', '-o', default='output_images/ver_2', help='Output directory')
+    parser.add_argument('--border-width', type=int, default=100, help='Border width for analysis')
+
     args = parser.parse_args()
-    
+
     if not args.image_name:
-        args.image_name = input("Base image name (without _slice_XXX.png): ").strip()
-    
-    solver = ColorSolverV2(args.sliced_dir, args.output, args.image_name)
+        args.image_name = input('Base image name (without _slice_XXX.png): ').strip()
+
+    solver = ColorSolverV2(args.sliced_dir, args.output, args.image_name, args.border_width)
     try:
-        print(f"Reconstructing '{args.image_name}' with COLOR V2 method...")
+        print(f"Running color reconstructor V2 for '{args.image_name}'...")
         solver.load_slices(args.image_name)
         solver.solve()
     except Exception as e:
         print(f"Error: {e}")
-
-
-if __name__ == "__main__":
-    main()

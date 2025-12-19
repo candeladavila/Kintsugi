@@ -120,8 +120,7 @@ class PuzzleSolverBaseV2:
         
         # Sort numerically to process in order
         try:
-            files = sorted(glob.glob(search_pattern), 
-                          key=lambda x: int(x.split('_slice_')[1].split('.')[0]))
+            files = sorted(glob.glob(search_pattern), key=lambda x: int(x.split('_slice_')[1].split('.')[0]))
         except IndexError:
             files = sorted(glob.glob(search_pattern))
         
@@ -152,6 +151,36 @@ class PuzzleSolverBaseV2:
             # Extract initial features (will be re-extracted when rotation is determined)
             slice_obj.borders = self.extract_features(img)
             self.slices.append(slice_obj)
+        
+        # SHUFFLE pieces to remove any ordering hints (keep fixed piece separate)
+        print(f"[{self.__class__.__name__}] Shuffling pieces (preserving fixed anchor)...")
+        import random
+        
+        # Find and extract the fixed piece (slice_000.png)
+        fixed_piece = None
+        other_pieces = []
+        
+        for piece in self.slices:
+            if piece.filename.endswith("_slice_000.png"):
+                fixed_piece = piece
+            else:
+                other_pieces.append(piece)
+        
+        # Shuffle all pieces except the fixed one
+        random.shuffle(other_pieces)
+        
+        # Rebuild the list: fixed piece first, then shuffled pieces
+        if fixed_piece:
+            self.slices = [fixed_piece] + other_pieces
+        else:
+            # If no fixed piece found, shuffle everything
+            self.slices = other_pieces
+        
+        # Re-assign IDs to match new indices
+        for idx, piece in enumerate(self.slices):
+            piece.id = idx
+        
+        print(f"[{self.__class__.__name__}] Pieces shuffled: order no longer reflects original position")
 
     def calculate_cost(self, idx_a: int, idx_b: int, direction: str, 
                        rotation_a: int = 0, rotation_b: int = 0) -> float:

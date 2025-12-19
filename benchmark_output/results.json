@@ -1,0 +1,182 @@
+[
+    {
+        "conexiones_correctas": 0.0,
+        "version": "v1",
+        "method": "random",
+        "grid": "3x3"
+    },
+    {
+        "conexiones_correctas": 0.0,
+        "version": "v1",
+        "method": "random",
+        "grid": "5x5"
+    },
+    {
+        "conexiones_correctas": 0.0,
+        "version": "v1",
+        "method": "random",
+        "grid": "10x10"
+    },
+    {
+        "conexiones_correctas": 0.0,
+        "version": "v1",
+        "method": "random",
+        "grid": "3x3"
+    },
+    {
+        "conexiones_correctas": 0.025,
+        "version": "v1",
+        "method": "random",
+        "grid": "5x5"
+    },
+    {
+        "conexiones_correctas": 0.0,
+        "version": "v1",
+        "method": "random",
+        "grid": "10x10"
+    },
+    {
+        "conexiones_correctas": 0.08333333333333333,
+        "version": "v1",
+        "method": "random",
+        "grid": "3x3"
+    },
+    {
+        "conexiones_correctas": 0.05,
+        "version": "v1",
+        "method": "random",
+        "grid": "5x5"
+    },
+    {
+        "conexiones_correctas": 0.005555555555555556,
+        "version": "v1",
+        "method": "random",
+        "grid": "10x10"
+    },
+    {
+        "conexiones_correctas": 0.0,
+        "version": "v1",
+        "method": "random",
+        "grid": "3x3"
+    },
+    {
+        "conexiones_correctas": 0.0,
+        "version": "v1",
+        "method": "random",
+        "grid": "5x5"
+    },
+    {
+        "conexiones_correctas": 0.005555555555555556,
+        "version": "v1",
+        "method": "random",
+        "grid": "10x10"
+    },
+    {
+        "conexiones_correctas": 0.0,
+        "version": "v1",
+        "method": "random",
+        "grid": "3x3"
+    },
+    {
+        "conexiones_correctas": 0.0,
+        "version": "v1",
+        "method": "random",
+        "grid": "5x5"
+    },
+    {
+        "conexiones_correctas": 0.016666666666666666,
+        "version": "v1",
+        "method": "random",
+        "grid": "10x10"
+    },
+    {
+        "conexiones_correctas": 0.16666666666666666,
+        "version": "v1",
+        "method": "random",
+        "grid": "3x3"
+    },
+    {
+        "conexiones_correctas": 0.05,
+        "version": "v1",
+        "method": "random",
+        "grid": "5x5"
+    },
+    {
+        "conexiones_correctas": 0.005555555555555556,
+        "version": "v1",
+        "method": "random",
+        "grid": "10x10"
+    },
+    {
+        "conexiones_correctas": 0.08333333333333333,
+        "version": "v1",
+        "method": "random",
+        "grid": "3x3"
+    },
+    {
+        "conexiones_correctas": 0.05,
+        "version": "v1",
+        "method": "random",
+        "grid": "5x5"
+    },
+    {
+        "conexiones_correctas": 0.011111111111111112,
+        "version": "v1",
+        "method": "random",
+        "grid": "10x10"
+    },
+    {
+        "conexiones_correctas": 0.16666666666666666,
+        "version": "v1",
+        "method": "random",
+        "grid": "3x3"
+    },
+    {
+        "conexiones_correctas": 0.075,
+        "version": "v1",
+        "method": "random",
+        "grid": "5x5"
+    },
+    {
+        "conexiones_correctas": 0.005555555555555556,
+        "version": "v1",
+        "method": "random",
+        "grid": "10x10"
+    },
+    {
+        "conexiones_correctas": 0.08333333333333333,
+        "version": "v1",
+        "method": "random",
+        "grid": "3x3"
+    },
+    {
+        "conexiones_correctas": 0.0,
+        "version": "v1",
+        "method": "random",
+        "grid": "5x5"
+    },
+    {
+        "conexiones_correctas": 0.011111111111111112,
+        "version": "v1",
+        "method": "random",
+        "grid": "10x10"
+    },
+    {
+        "conexiones_correctas": 0.0,
+        "version": "v1",
+        "method": "random",
+        "grid": "3x3"
+    },
+    {
+        "conexiones_correctas": 0.0,
+        "version": "v1",
+        "method": "random",
+        "grid": "5x5"
+    },
+    {
+        "conexiones_correctas": 0.005555555555555556,
+        "version": "v1",
+        "method": "random",
+        "grid": "10x10"
+    }
+]

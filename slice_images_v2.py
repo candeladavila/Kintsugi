@@ -14,6 +14,36 @@ import argparse
 import random
 
 
+def resolve_image_path(path_or_name: str, images_dir: str = "images") -> str:
+    """
+    Resolve an image path or filename.
+    If the provided string is an existing path, return it.
+    Otherwise, try to find the file inside `images_dir`.
+    """
+    # If it's already a valid path, return it
+    if os.path.isabs(path_or_name) and os.path.exists(path_or_name):
+        return path_or_name
+
+    if os.path.exists(path_or_name):
+        return path_or_name
+
+    # Try inside images_dir
+    candidate = os.path.join(images_dir, path_or_name)
+    if os.path.exists(candidate):
+        return candidate
+
+    # Try with common extensions if user provided base name without extension
+    name, ext = os.path.splitext(path_or_name)
+    if ext == "":
+        for ext_try in [".jpg", ".jpeg", ".png", ".bmp", ".tiff"]:
+            candidate_ext = os.path.join(images_dir, name + ext_try)
+            if os.path.exists(candidate_ext):
+                return candidate_ext
+
+    # Fallback: return original input (slice_image_v2 will raise if invalid)
+    return path_or_name
+
+
 # Rotation angles: 0, 90, 180, 270 degrees
 ROTATION_ANGLES = [0, 90, 180, 270]
 
@@ -251,15 +281,19 @@ def main():
                     args.image_path = choice
         
         if not args.image_path:
-            args.image_path = input("Enter image path: ").strip()
+            user_input = input("Enter image path or filename in images/: ").strip()
+            args.image_path = user_input
         
         num_input = input(f"Number of pieces [{args.num_slices}]: ").strip()
         if num_input:
             args.num_slices = int(num_input)
     
-    if not os.path.exists(args.image_path):
+    # Resolve image path (accept full path or filename in images/)
+    resolved = resolve_image_path(args.image_path)
+    if not resolved or not os.path.exists(resolved):
         print(f"Error: Image not found: {args.image_path}")
         return
+    args.image_path = resolved
     
     try:
         slice_image_v2(args.image_path, args.num_slices, args.output)

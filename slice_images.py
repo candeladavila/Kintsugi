@@ -6,7 +6,7 @@ import argparse
 import random
 
 
-def slice_image(image_path, num_slices, output_dir="sliced_images"):
+def slice_image(image_path, num_slices, output_dir="sliced_images_v1"):
     """
     Divides an image into num_slices square parts and generates a text file
     with the correct order for reconstruction.
@@ -141,6 +141,36 @@ def slice_image(image_path, num_slices, output_dir="sliced_images"):
     return slice_order
 
 
+def resolve_image_path(path_or_name: str, images_dir: str = "images") -> str:
+    """
+    Resolve an image path or filename.
+    If the provided string is an existing path, return it.
+    Otherwise, try to find the file inside `images_dir`.
+    """
+    # If it's already a valid path, return it
+    if os.path.isabs(path_or_name) and os.path.exists(path_or_name):
+        return path_or_name
+
+    if os.path.exists(path_or_name):
+        return path_or_name
+
+    # Try inside images_dir
+    candidate = os.path.join(images_dir, path_or_name)
+    if os.path.exists(candidate):
+        return candidate
+
+    # Try with common extensions if user provided base name without extension
+    name, ext = os.path.splitext(path_or_name)
+    if ext == "":
+        for ext_try in [".jpg", ".jpeg", ".png", ".bmp"]:
+            candidate_ext = os.path.join(images_dir, name + ext_try)
+            if os.path.exists(candidate_ext):
+                return candidate_ext
+
+    # Fallback: return original input (slice_image will raise if invalid)
+    return path_or_name
+
+
 def reconstruct_image(order_file_path, output_path="reconstructed_image.png"):
     """
     Recompone una imagen a partir del archivo de orden.
@@ -235,7 +265,8 @@ def main():
                 return
             
             output_dir = args.output if args.output else "sliced_images"
-            slice_image(args.input_path, args.num_slices, output_dir)
+            image_path = resolve_image_path(args.input_path)
+            slice_image(image_path, args.num_slices, output_dir)
             
         elif args.action == 'reconstruct':
             output_path = args.output if args.output else "reconstructed_image.png"
@@ -259,19 +290,21 @@ if __name__ == "__main__":
     
     # Obtener datos del usuario
     if len(sys.argv) >= 3:
-        # Usar argumentos de línea de comandos
-        image_path = sys.argv[1]
+        # Use command-line arguments
+        image_path = resolve_image_path(sys.argv[1])
         try:
             num_slices = int(sys.argv[2])
         except ValueError:
             print("❌ Error: El número de slices debe ser un entero")
             sys.exit(1)
     else:
-        # Modo interactivo simplificado
-        image_path = input("Ruta de la imagen: ").strip()
-        if not image_path:
+        # Simplified interactive mode: accept filename or path
+        user_input = input("Ruta o nombre de la imagen (si está en images/, solo el nombre): ").strip()
+        if not user_input:
             image_path = DEFAULT_IMAGE_PATH
-            
+        else:
+            image_path = resolve_image_path(user_input)
+
         try:
             num_input = input(f"Número de trozos (Enter para {DEFAULT_NUM_SLICES}): ").strip()
             if num_input:

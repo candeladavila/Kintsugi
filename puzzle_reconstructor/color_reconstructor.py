@@ -3,20 +3,19 @@ import numpy as np
 import os
 import sys
 
-# Asegurar que se puede importar puzzle_base desde el mismo directorio
+# Ensure puzzle_base can be imported from the same directory
 sys.path.insert(0, os.path.dirname(__file__))
 
 from puzzle_base import PuzzleSolverBase
 
 class ColorSolver(PuzzleSolverBase):
-    def __init__(self, sliced_dir: str, output_dir: str, image_name: str = "", border_width: int = 10):
+    def __init__(self, sliced_dir: str, output_dir: str, image_name: str = "", border_width: int = 100):
         super().__init__(sliced_dir, output_dir, image_name, border_width)
     
     def extract_features(self, img: np.ndarray):
         """
-        Convierte a espacio de color LAB.
-        L = Luminosidad, a/b = canales de color.
-        Es mucho mejor que RGB para comparar similitud visual.
+        Convert to LAB color space.
+        L = lightness, a/b = color channels.
         """
         lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB).astype(np.float32)
         w_b = self.border_width
@@ -29,19 +28,22 @@ class ColorSolver(PuzzleSolverBase):
         }
 
     def calculate_cost(self, idx_a: int, idx_b: int, direction: str) -> float:
-        """Calcula la distancia de color entre los bordes de contacto."""
+        """Calculates the color distance between contacting edges."""
         feats_a = self.slices[idx_a].borders
         feats_b = self.slices[idx_b].borders
         
         if direction == 'horizontal':
-            edge_a = feats_a['right'][:, -1]
-            edge_b = feats_b['left'][:, 0]
+            # Extract right edge of A and left edge of B
+            # Borders are (height, width, 3), so we take the last column and first column
+            edge_a = feats_a['right'][:, -1, :]  # (height, 3)
+            edge_b = feats_b['left'][:, 0, :]     # (height, 3)
         else: # vertical
-            edge_a = feats_a['bottom'][-1, :]
-            edge_b = feats_b['top'][0, :]
+            # Extract bottom edge of A and top edge of B
+            edge_a = feats_a['bottom'][-1, :, :]  # (width, 3)
+            edge_b = feats_b['top'][0, :, :]      # (width, 3)
             
-        # Distancia Euclidiana entre los vectores de color (L, a, b)
-        # axis=1 porque shape es (N, 3)
+        # Euclidean distance between the color vectors (L, a, b)
+        # axis=1 because shape is (N, 3) where N is height or width
         diff = np.linalg.norm(edge_a - edge_b, axis=1)
         return np.mean(diff)
 
