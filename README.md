@@ -1,6 +1,6 @@
 # Kintsugi 🧩
 
-An intelligent image puzzle system that divides images into randomized pieces and then automatically reconstructs them using multiple AI algorithms. Named after the Japanese art of repairing broken pottery with gold, symbolizing the beauty found in reconstruction.
+An intelligent image puzzle system that divides images into randomized pieces and then automatically reconstructs them using multiple algorithms. Named after the Japanese art of repairing broken pottery with gold, symbolizing the beauty found in reconstruction.
 
 ## 🌟 Features
 
@@ -33,7 +33,7 @@ pip install opencv-python numpy
 
 ### Basic Usage
 
-1. **Interactive Mode** (Recommended for beginners):
+1. **Interactive Mode**:
 ```bash
 python main.py
 # Then select:
@@ -75,27 +75,27 @@ python main.py images/example.jpg 16 all
 
 ### Advanced: Configurable Border Width
 
-You can adjust the border analysis width (default: 10 pixels) for fine-tuning algorithm performance:
+You can adjust the border analysis width (default: 100 pixels) for fine-tuning algorithm performance:
 
 ```python
 from puzzle_reconstructor.color_reconstructor import ColorSolver
 
-# Default border width (10 pixels)
+# Default border width (100 pixels)
 solver = ColorSolver("sliced_images/example_16slices", 
                      "output_images", 
                      "example")
 
-# Custom border width (30 pixels for more context)
+# Custom border width (120 pixels for more context)
 solver = ColorSolver("sliced_images/example_16slices", 
                      "output_images", 
                      "example",
-                     border_width=30)
+                     border_width=120)
 
-# Larger border for high-resolution puzzles (100 pixels)
+# Larger border for high-resolution puzzles (200 pixels)
 solver = ColorSolver("sliced_images/example_16slices", 
                      "output_images", 
                      "example",
-                     border_width=100)
+                     border_width=200)
 ```
 
 **Border Width Guidelines:**
@@ -203,7 +203,7 @@ Features:
 
 ### Gradient Analysis Algorithm
 
-1. **Edge Detection**: Apply Sobel filters to detect horizontal/vertical edges
+1. **Edge Detection**: Apply Sobel (3x3) filters to detect horizontal/vertical edges
 2. **Boundary Analysis**: Extract edge pixels along piece boundaries
 3. **Compatibility Scoring**: Calculate gradient similarity between potential neighbors
 4. **Optimization**: Use greedy placement with backtracking for optimal arrangement
