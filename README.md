@@ -120,15 +120,18 @@ Kintsugi/
 ├── slice_images.py                            # Image slicing V1 (no rotation)
 ├── slice_images_v2.py                         # Image slicing V2 (with rotation)
 ├── puzzle_solver.py                           # Unified reconstruction interface
-├── benchmark_puzzle_v1_v2_multi_grids.py      # Comprehensive benchmarking tool
-├── analyze_border_comparison_color.py         # Color-based border analysis
-├── analyze_border_comparison_gradient.py      # Gradient-based border analysis
-├── analyze_border_comparison_paikin.py        # Paikin-based border analysis
-├── analyze_border_slice_6_vs_7.py             # Border analysis for specific slices
-├── generate_clean_grid.py                     # Clean grid generation V1
-├── generate_clean_grid_v2.py                  # Clean grid generation V2
-├── extract_borders.py                         # Border extraction utility
 ├── requirements.txt                           # Project dependencies
+├── LICENSE                                    # Project license
+├── .gitignore                                 # Git ignore file
+├── Auxiliar_Scripts/                          # Auxiliary tools and utilities
+│   ├── benchmark_puzzle_v1_v2_multi_grids.py  # Comprehensive benchmarking tool
+│   ├── analyze_border_comparison_color.py     # Color-based border analysis
+│   ├── analyze_border_comparison_gradient.py  # Gradient-based border analysis
+│   ├── analyze_border_comparison_paikin.py    # Paikin-based border analysis
+│   ├── analyze_border_slice_6_vs_7.py         # Border analysis for specific slices
+│   ├── generate_clean_grid.py                 # Clean grid generation V1
+│   ├── generate_clean_grid_v2.py              # Clean grid generation V2
+│   └── extract_borders.py                     # Border extraction utility
 ├── puzzle_reconstructor/                      # V1 Reconstruction algorithms
 │   ├── __init__.py
 │   ├── puzzle_base.py                         # Base class with connection graph + backtracking
@@ -145,6 +148,7 @@ Kintsugi/
 │   └── random_reconstructor_v2.py             # Random with rotation support
 ├── images/                                    # Input images directory
 ├── datasets/                                  # Dataset directory (e.g., CIFAR-10)
+│   └── cifar-10-batches-py/                   # CIFAR-10 dataset (auto-downloaded)
 ├── sliced_images_v1/                          # V1 puzzle pieces (no rotation)
 │   └── [imagename]_[N]slices/
 │       ├── [imagename]_slice_000.png
@@ -178,11 +182,8 @@ Kintsugi/
 │           ├── color_v2_reconstruction_map.txt
 │           ├── random_v2_reconstructed.png
 │           └── random_v2_reconstruction_map.txt
-├── benchmark_output/                          # Benchmark results
-│   ├── results.json                           # Detailed results
-│   └── benchmark_summary.csv                  # CSV summary
-├── border_analysis_output/                    # Border comparison visualizations
-└── borders_[imagename]_slice_[N]/             # Extracted borders for analysis
+└── benchmark_output/                          # Benchmark results
+    └── results.json                           # Detailed benchmark data
 ```
 
 ## 🛠️ Components
