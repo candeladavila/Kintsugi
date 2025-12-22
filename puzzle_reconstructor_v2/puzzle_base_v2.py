@@ -10,6 +10,7 @@ import glob
 import math
 import cv2
 import numpy as np
+import networkx as nx
 from dataclasses import dataclass, field
 from typing import List, Dict, Tuple, Optional
 
@@ -230,129 +231,113 @@ class PuzzleSolverBaseV2:
         
         return best_cost, best_rot_a, best_rot_b
 
-    def find_top_left_corner(self, n_slices: int) -> Tuple[int, int]:
-        """
-        Finds the piece and rotation that is probably the top-left corner.
-        
-        Returns:
-            Tuple (piece_index, rotation)
-        """
-        max_min_cost = -1
-        best_candidate = 0
-        best_rotation = 0
-
-        for i in range(n_slices):
-            for rotation in ROTATIONS:
-                # Calculate minimum costs from left and top with this rotation
-                min_left = min([
-                    self.calculate_cost(j, i, 'horizontal', 0, rotation) 
-                    for j in range(n_slices) if i != j
-                ])
-                min_top = min([
-                    self.calculate_cost(j, i, 'vertical', 0, rotation) 
-                    for j in range(n_slices) if i != j
-                ])
-                
-                corner_score = min_left + min_top
-                
-                if corner_score > max_min_cost:
-                    max_min_cost = corner_score
-                    best_candidate = i
-                    best_rotation = rotation
-        
-        return best_candidate, best_rotation
-
     def solve(self):
         """
-        Automatic Greedy algorithm to reconstruct the puzzle with rotation support.
+        Ultra-robust reconstruction using Global Affinity Graphs (MST) 
+        combined with Recursive Backtracking and Rotation Support.
         """
+        import heapq
         n_slices = len(self.slices)
         side = int(math.sqrt(n_slices))
         rows, cols = side, side
         
-        if rows * cols != n_slices:
-            print(f"Warning: {n_slices} pieces don't form a perfect square")
+        # 1. GLOBAL ANALYSIS: Build Affinity Graph with Rotations
+        # This step ensures we know which pieces "belong" together globally.
+        print(f"[{self.__class__.__name__}] Stage 1: Building global affinity graph...")
+        G = nx.Graph()
+        for i in range(n_slices):
+            for j in range(i + 1, n_slices):
+                # Find the best possible handshake (any direction, any rotation)
+                h_cost, _, _ = self.calculate_cost_all_rotations(i, j, 'horizontal')
+                v_cost, _, _ = self.calculate_cost_all_rotations(i, j, 'vertical')
+                G.add_edge(i, j, weight=min(h_cost, v_cost))
+        
+        # Identify the "backbone" of the puzzle
+        mst = nx.minimum_spanning_tree(G)
 
-        # Grid stores tuples: (slice_object, rotation)
+        # 2. BACKTRACKING SETUP
         grid = [[None for _ in range(cols)] for _ in range(rows)]
         used_indices = set()
         
-        # 1) Anchor the reconstruction with the FIXED top-left piece produced by slice_images_v2.
-        #    Robustly locate it by filename, not by assuming it's index 0.
-        print("Using FIXED top-left corner piece (_slice_000.png)...")
-        fixed_idx = next(
-            (i for i, slc in enumerate(self.slices) if slc.filename.endswith("_slice_000.png")),
-            None
-        )
+        # Cost threshold to prune bad branches early
+        self.backtrack_threshold = 3.0 
 
+        # Find starting anchor (Fixed piece or best corner)
+        fixed_idx = next((i for i, slc in enumerate(self.slices) if slc.filename.endswith("_slice_000.png")), None)
         if fixed_idx is not None:
-            # Lock the anchor piece at (0,0) with 0° rotation.
-            self.slices[fixed_idx].id = fixed_idx  # enforce invariant id == list index
-            self.slices[fixed_idx].set_rotation(0)
-            grid[0][0] = self.slices[fixed_idx]
-            used_indices.add(fixed_idx)
-            print(f"-> Fixed piece: {self.slices[fixed_idx].filename} at (0,0) with rotation 0°")
+            start_idx, start_rot = fixed_idx, 0
         else:
-            print("Warning: _slice_000.png not found, falling back to corner detection")
-            start_idx, start_rotation = self.find_top_left_corner(n_slices)
-            self.slices[start_idx].set_rotation(start_rotation)
-            grid[0][0] = self.slices[start_idx]
-            used_indices.add(start_idx)
-            print(f"-> Initial piece: {self.slices[start_idx].filename} (rotation: {start_rotation}°)")
-        
-        # 2. Fill grid
-        for r in range(rows):
-            for c in range(cols):
-                if r == 0 and c == 0: 
+            start_idx, start_rot = self.find_top_left_corner(n_slices)
+
+        print(f"[{self.__class__.__name__}] Stage 2: Executing MST-guided backtracking...")
+
+        # 3. MST-GUIDED RECURSION
+        def backtrack(r, c):
+            if r == rows: # Success! All slots filled
+                return True
+            
+            next_r, next_c = (r, c + 1) if (c + 1) < cols else (r + 1, 0)
+            
+            # Generate and score candidates for the current slot
+            candidates = []
+            for idx in range(n_slices):
+                if idx in used_indices:
                     continue
                 
-                best_idx = -1
-                best_rotation = 0
-                min_cost = float('inf')
-                
-                for idx in range(n_slices):
-                    if idx in used_indices: 
-                        continue
+                for rot in ROTATIONS:
+                    cost = 0.0
+                    count = 0
+                    mst_bonus = 1.0 # The graph "vote"
                     
-                    # Try all rotations for this piece
-                    for rotation in ROTATIONS:
-                        cost = 0
-                        count = 0
-                        
-                        # Compare with left neighbor
-                        if c > 0:
-                            left_slice = grid[r][c-1]
-                            cost += self.calculate_cost(
-                                left_slice.id, idx, 'horizontal',
-                                left_slice.current_rotation, rotation
-                            )
-                            count += 1
-                        
-                        # Compare with top neighbor
-                        if r > 0:
-                            top_slice = grid[r-1][c]
-                            cost += self.calculate_cost(
-                                top_slice.id, idx, 'vertical',
-                                top_slice.current_rotation, rotation
-                            )
-                            count += 1
-                        
-                        avg_cost = cost / count if count > 0 else float('inf')
-                        
-                        if avg_cost < min_cost:
-                            min_cost = avg_cost
-                            best_idx = idx
-                            best_rotation = rotation
+                    # Vertical connection (with Top neighbor)
+                    if r > 0:
+                        top_s = grid[r-1][c]
+                        cost += self.calculate_cost(top_s.id, idx, 'vertical', top_s.current_rotation, rot)
+                        count += 1
+                        if mst.has_edge(top_s.id, idx): mst_bonus *= 0.5
+                    
+                    # Horizontal connection (with Left neighbor)
+                    if c > 0:
+                        left_s = grid[r][c-1]
+                        cost += self.calculate_cost(left_s.id, idx, 'horizontal', left_s.current_rotation, rot)
+                        count += 1
+                        if mst.has_edge(left_s.id, idx): mst_bonus *= 0.5
+
+                    # Score calculation
+                    avg_cost = (cost / count) * mst_bonus if count > 0 else 0.0
+                    
+                    # Pruning: Only explore if it's a plausible match
+                    if avg_cost < self.backtrack_threshold:
+                        candidates.append((avg_cost, idx, rot))
+            
+            # Sort candidates by cost to follow the most likely path first
+            candidates.sort(key=lambda x: x[0])
+            
+            # Limit search breadth to top 10 candidates for performance
+            for _, idx, rot in candidates[:10]:
+                self.slices[idx].set_rotation(rot)
+                grid[r][c] = self.slices[idx]
+                used_indices.add(idx)
                 
-                # Safety fallback
-                if best_idx == -1:
-                    best_idx = next(i for i in range(n_slices) if i not in used_indices)
-                    best_rotation = 0
+                if backtrack(next_r, next_c):
+                    return True
                 
-                self.slices[best_idx].set_rotation(best_rotation)
-                grid[r][c] = self.slices[best_idx]
-                used_indices.add(best_idx)
+                # Undo placement (Backtrack)
+                used_indices.remove(idx)
+                grid[r][c] = None
+                
+            return False
+
+        # 4. EXECUTION
+        self.slices[start_idx].set_rotation(start_rot)
+        grid[0][0] = self.slices[start_idx]
+        used_indices.add(start_idx)
         
+        if backtrack(0, 1):
+            print(f"[{self.__class__.__name__}] ✓ Perfect assembly found.")
+        else:
+            print(f"[{self.__class__.__name__}] ⚠ Backtracking failed to find perfect fit. Results might be partial.")
+
         self.save_results(grid, rows, cols)
 
     def load_solution_mapping(self) -> dict:

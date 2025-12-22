@@ -3,6 +3,7 @@ import glob
 import math
 import cv2
 import numpy as np
+import networkx as nx
 from dataclasses import dataclass
 from typing import List, Dict, Tuple
 
@@ -10,10 +11,8 @@ from typing import List, Dict, Tuple
 class ImageSlice:
     id: int
     filename: str
-    image: np.ndarray
-    # Features (borders) for analysis
+    original_image: np.ndarray
     borders: Dict[str, np.ndarray]
-
 
 class PuzzleSolverBase:
     def __init__(self, sliced_dir: str, output_dir: str, image_name: str = "", border_width: int = 10):
@@ -21,10 +20,9 @@ class PuzzleSolverBase:
         self.output_dir = output_dir
         self.image_name = image_name
         self.slices: List[ImageSlice] = []
-        self.border_width = border_width  # Border width to analyze (configurable, default 10 pixels)
+        self.border_width = border_width
 
     def extract_features(self, img: np.ndarray) -> Dict[str, np.ndarray]:
-        """Extracts borders for analysis. Can be overridden."""
         w_b = self.border_width
         return {
             'top': img[0:w_b, :],
@@ -34,237 +32,217 @@ class PuzzleSolverBase:
         }
 
     def load_slices(self, original_name_pattern: str):
-        """Load the existing slices from the specified folder."""
-        # Search files with pattern: name_slice_XXX.png in the specified folder
         search_pattern = os.path.join(self.sliced_dir, f"{original_name_pattern}_slice_*.png")
-
-        # Sort numerically to process in order
         try:
             files = sorted(glob.glob(search_pattern), key=lambda x: int(x.split('_slice_')[1].split('.')[0]))
-        except IndexError:
-            # Fallback if the name does not follow the exact format
+        except (IndexError, ValueError):
             files = sorted(glob.glob(search_pattern))
 
         if not files:
             raise FileNotFoundError(f"No images found in: {search_pattern}")
 
-        print(f"[{self.__class__.__name__}] Loading {len(files)} slices from {self.sliced_dir}...")
-
+        self.slices = []
         for idx, fpath in enumerate(files):
             img = cv2.imread(fpath)
-            if img is None:
-                continue
-
+            if img is None: continue
             features = self.extract_features(img)
             self.slices.append(ImageSlice(idx, os.path.basename(fpath), img, features))
+        
+        print(f"✓ Loaded {len(self.slices)} slices")
 
     def calculate_cost(self, idx_a: int, idx_b: int, direction: str) -> float:
-        """Must be implemented by subclasses (Gradient and Color)."""
         raise NotImplementedError
 
     def find_top_left_corner(self, n_slices: int) -> int:
-        """
-        Finds the piece that has the worst best-match ABOVE and to the LEFT.
-        That piece is likely the top-left corner.
-
-        Strategy:
-        - For each piece i, compute:
-            min_left = min_j cost(j -> i, horizontal)  (some piece j would be to the LEFT of i)
-            min_top  = min_j cost(j -> i, vertical)    (some piece j would be ABOVE i)
-        - Choose the i that maximizes (min_left + min_top).
-            Higher means: even its best possible neighbor on those sides is still a poor match.
-        """
         max_min_cost = -1.0
         best_candidate = 0
-
         for i in range(n_slices):
-            min_left = float('inf')
-            min_top = float('inf')
-
-            for j in range(n_slices):
-                if i == j:
-                    continue
-
-                c_left = self.calculate_cost(j, i, 'horizontal')
-                if c_left < min_left:
-                    min_left = c_left
-
-                c_top = self.calculate_cost(j, i, 'vertical')
-                if c_top < min_top:
-                    min_top = c_top
-
-            corner_score = min_left + min_top
-            if corner_score > max_min_cost:
-                max_min_cost = corner_score
+            min_left = min([self.calculate_cost(j, i, 'horizontal') for j in range(n_slices) if i != j], default=float('inf'))
+            min_top = min([self.calculate_cost(j, i, 'vertical') for j in range(n_slices) if i != j], default=float('inf'))
+            if (min_left + min_top) > max_min_cost:
+                max_min_cost = min_left + min_top
                 best_candidate = i
-
         return best_candidate
 
     def solve(self):
-        """Automatic Greedy algorithm to reconstruct the puzzle."""
+        """
+        Improved reconstruction using a Priority Queue (Best-First Search) 
+        and MST as a structural guide.
+        """
+        import heapq
+        
         n_slices = len(self.slices)
         side = int(math.sqrt(n_slices))
         rows, cols = side, side
-
-        # If not a perfect square, try to adjust (e.g. 2x3 for 6 pieces)
-        if rows * cols != n_slices:
-            # Simple logic: if not square, assume it's wide
-            # This can be improved if you know the dimensions
-            pass
-
-        grid = [[None for _ in range(cols)] for _ in range(rows)]
+        
+        # 1. Graph Construction and MST
+        # We build a global graph of all possible connections to identify 
+        # the strongest structural links across the entire image.
+        G = nx.Graph()
+        for i in range(n_slices):
+            for j in range(i + 1, n_slices):
+                cost_h = min(self.calculate_cost(i, j, 'horizontal'), self.calculate_cost(j, i, 'horizontal'))
+                cost_v = min(self.calculate_cost(i, j, 'vertical'), self.calculate_cost(j, i, 'vertical'))
+                G.add_edge(i, j, weight=min(cost_h, cost_v))
+        
+        mst = nx.minimum_spanning_tree(G)
+        
+        # 2. Initialization
+        # We use a dictionary for the grid to allow non-sequential filling.
+        grid = {} 
         used_indices = set()
+        priority_queue = [] # Format: (cost, row, col, piece_index)
 
-        # 1. Detect top-left corner
-        print("Searching for top-left corner...")
+        # 3. Place Seed Piece (Top-Left Corner)
         start_idx = self.find_top_left_corner(n_slices)
-        grid[0][0] = self.slices[start_idx]
+        grid[(0, 0)] = self.slices[start_idx]
         used_indices.add(start_idx)
-        print(f"-> Selected start piece: {self.slices[start_idx].filename}")
 
-        # 2. Fill grid
-        for r in range(rows):
-            for c in range(cols):
-                if r == 0 and c == 0:
-                    continue
+        def add_neighbors_to_queue(r, c):
+            """Identifies empty adjacent slots and finds the best candidates for them."""
+            for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                nr, nc = r + dr, c + dc
+                # Ensure we stay within puzzle dimensions and target empty slots
+                if 0 <= nr < rows and 0 <= nc < cols and (nr, nc) not in grid:
+                    self._push_best_for_slot(nr, nc, grid, used_indices, priority_queue, mst)
 
-                best_idx = -1
-                min_cost = float('inf')
+        # Start by looking for pieces that fit next to the corner
+        add_neighbors_to_queue(0, 0)
 
-                for idx in range(n_slices):
-                    if idx in used_indices:
-                        continue
+        # 4. Main Reconstruction Loop (Best-Fit First)
+        while len(used_indices) < n_slices and priority_queue:
+            cost, r, c, idx = heapq.heappop(priority_queue)
 
-                    cost = 0.0
-                    count = 0
+            # Skip if the slot was filled or the piece was used elsewhere while in queue
+            if (r, c) in grid or idx in used_indices:
+                if (r, c) not in grid:
+                    # If slot is still empty, find a new best candidate from remaining pieces
+                    self._push_best_for_slot(r, c, grid, used_indices, priority_queue, mst)
+                continue
 
-                    if c > 0:  # Compare with left neighbor
-                        left_slice = grid[r][c - 1]
-                        left_idx = self.slices.index(left_slice)  # robust: do not rely on piece.id
-                        cost += self.calculate_cost(left_idx, idx, 'horizontal')
-                        count += 1
+            # Place the piece in the grid
+            grid[(r, c)] = self.slices[idx]
+            used_indices.add(idx)
+            
+            # Expand search to the neighbors of the newly placed piece
+            add_neighbors_to_queue(r, c)
 
-                    if r > 0:  # Compare with top neighbor
-                        top_slice = grid[r - 1][c]
-                        top_idx = self.slices.index(top_slice)  # robust: do not rely on piece.id
-                        cost += self.calculate_cost(top_idx, idx, 'vertical')
-                        count += 1
+        # 5. Final Assembly
+        # Convert dictionary to the list of lists format required by save_results
+        final_grid = [[grid.get((r, c), self.slices[0]) for c in range(cols)] for r in range(rows)]
+        self.save_results(final_grid, rows, cols)
 
-                    avg_cost = cost / count if count > 0 else float('inf')
-
-                    if avg_cost < min_cost:
-                        min_cost = avg_cost
-                        best_idx = idx
-
-                # Safety fallback
-                if best_idx == -1:
-                    best_idx = next(i for i in range(n_slices) if i not in used_indices)
-
-                grid[r][c] = self.slices[best_idx]
-                used_indices.add(best_idx)
-
-        self.save_results(grid, rows, cols)
+    def _push_best_for_slot(self, r, c, grid, used_indices, pq, mst):
+        """
+        Evaluates all available pieces for a specific (r, c) slot.
+        Considers all existing neighbors (up, down, left, right) for a multilateral fit.
+        """
+        import heapq
+        best_idx, min_cost = -1, float('inf')
+        
+        for idx in range(len(self.slices)):
+            if idx in used_indices: continue
+            
+            total_cost, count, bonus = 0.0, 0, 1.0
+            
+            # Adjacency checks: (neighbor_row, neighbor_col, direction, is_neighbor_on_top_or_left)
+            adjacents = [
+                (r, c-1, 'horizontal', True),  # Left neighbor (neighbor -> current)
+                (r, c+1, 'horizontal', False), # Right neighbor (current -> neighbor)
+                (r-1, c, 'vertical', True),    # Top neighbor (neighbor -> current)
+                (r+1, c, 'vertical', False)    # Bottom neighbor (current -> neighbor)
+            ]
+            
+            for nr, nc, direct, is_predecessor in adjacents:
+                if (nr, nc) in grid:
+                    neighbor_slice = grid[(nr, nc)]
+                    # Get index of the neighbor piece
+                    neighbor_idx = next(i for i, s in enumerate(self.slices) if s.filename == neighbor_slice.filename)
+                    
+                    if is_predecessor:
+                        total_cost += self.calculate_cost(neighbor_idx, idx, direct)
+                        if mst.has_edge(neighbor_idx, idx): bonus = 0.5
+                    else:
+                        total_cost += self.calculate_cost(idx, neighbor_idx, direct)
+                        if mst.has_edge(idx, neighbor_idx): bonus = 0.5
+                    count += 1
+            
+            if count > 0:
+                # Average the cost if multiple neighbors exist (e.g., an inside corner)
+                avg_cost = (total_cost / count) * bonus
+                if avg_cost < min_cost:
+                    min_cost, best_idx = avg_cost, idx
+        
+        if best_idx != -1:
+            heapq.heappush(pq, (min_cost, r, c, best_idx))
 
     def load_solution_mapping(self) -> dict:
-        """
-        Load the correct solution mapping from the _order.txt file
-
-        Returns:
-            Dictionary {filename: (correct_row, correct_col)}
-        """
+        """Parses the order.txt file to get the correct position of each piece."""
         order_file = os.path.join(self.sliced_dir, f"{self.image_name}_order.txt")
         solution_map = {}
+        if not os.path.exists(order_file): return solution_map
 
-        if not os.path.exists(order_file):
-            print(f"⚠ Warning: solution file not found: {order_file}")
-            return solution_map
-
-        try:
-            with open(order_file, 'r') as f:
-                lines = f.readlines()
-
-            # Find section "ORDEN CORRECTO PARA RECOMPOSICIÓN"
-            in_section = False
-            for line in lines:
-                if "ORDEN CORRECTO PARA RECOMPOSICIÓN" in line:
-                    in_section = True
-                    continue
-
-                if in_section and "|" in line and "_slice_" in line:
-                    parts = line.split("|")
-                    if len(parts) >= 4:
+        with open(order_file, 'r') as f:
+            lines = f.readlines()
+            
+        start_parsing = False
+        for line in lines:
+            # Look for the header line with the table columns
+            if ("Archivo Guardado" in line or "Saved File" in line) and "Fila" in line:
+                start_parsing = True
+                continue
+            # Look for separator line
+            if start_parsing and "---" in line:
+                continue
+            # Parse data lines
+            if start_parsing and "|" in line:
+                parts = line.split("|")
+                if len(parts) >= 4:
+                    try:
                         filename = parts[1].strip()
                         row = int(parts[2].strip())
                         col = int(parts[3].strip())
                         solution_map[filename] = (row, col)
-
-        except Exception as e:
-            print(f"⚠ Warning: error reading solution file: {e}")
-
+                    except ValueError: 
+                        continue
+            # Stop parsing after the table ends
+            if start_parsing and line.strip().startswith("--") and len(solution_map) > 0:
+                break
         return solution_map
 
     def calculate_accuracy(self, grid, rows: int, cols: int) -> dict:
-        """
-        Calculate reconstruction accuracy based on correctly connected borders.
-        A border is correct if the two adjacent pieces should be together in the solution.
-
-        Returns:
-            Dictionary with accuracy metrics
-        """
         solution_map = self.load_solution_mapping()
+        if not solution_map: return {'correct_borders': 0, 'total_borders': 0, 'border_accuracy_percent': 0.0}
 
-        if not solution_map:
-            return {
-                'correct_borders': 0,
-                'total_borders': 0,
-                'border_accuracy_percent': 0.0
-            }
-
-        # Create inverse mapping: (correct_row, correct_col) -> filename
-        position_to_file = {}
-        for filename, (row, col) in solution_map.items():
-            position_to_file[(row, col)] = filename
-
-        correct_borders = 0
-        total_borders = 0
-
-        # Verify correct borders (adjacencies)
+        correct_borders, total_borders = 0, 0
         for r in range(rows):
             for c in range(cols):
-                piece = grid[r][c]
-                if piece.filename not in solution_map:
-                    continue
+                p = grid[r][c]
+                if p.filename not in solution_map: continue
+                pr, pc = solution_map[p.filename]
 
-                piece_correct_row, piece_correct_col = solution_map[piece.filename]
-
-                # Verify right neighbor
-                if c < cols - 1:
+                if c < cols - 1: # Right neighbor
                     total_borders += 1
-                    right_piece = grid[r][c + 1]
-
-                    expected_right_pos = (piece_correct_row, piece_correct_col + 1)
-                    if expected_right_pos in position_to_file:
-                        expected_right_file = position_to_file[expected_right_pos]
-                        if right_piece.filename == expected_right_file:
+                    neighbor = grid[r][c+1]
+                    if neighbor.filename in solution_map:
+                        nr, nc = solution_map[neighbor.filename]
+                        # Correct connection: neighbor is exactly one position to the right in the solution
+                        if nr == pr and nc == pc + 1: 
                             correct_borders += 1
 
-                # Verify bottom neighbor
-                if r < rows - 1:
+                if r < rows - 1: # Bottom neighbor
                     total_borders += 1
-                    bottom_piece = grid[r + 1][c]
-
-                    expected_bottom_pos = (piece_correct_row + 1, piece_correct_col)
-                    if expected_bottom_pos in position_to_file:
-                        expected_bottom_file = position_to_file[expected_bottom_pos]
-                        if bottom_piece.filename == expected_bottom_file:
+                    neighbor = grid[r+1][c]
+                    if neighbor.filename in solution_map:
+                        nr, nc = solution_map[neighbor.filename]
+                        # Correct connection: neighbor is exactly one position below in the solution
+                        if nr == pr + 1 and nc == pc: 
                             correct_borders += 1
-
-        border_accuracy = (correct_borders / total_borders * 100) if total_borders > 0 else 0.0
 
         return {
-            'correct_borders': correct_borders,
-            'total_borders': total_borders,
-            'border_accuracy_percent': border_accuracy
+            'correct_borders': correct_borders, 
+            'total_borders': total_borders, 
+            'border_accuracy_percent': (correct_borders / total_borders * 100) if total_borders > 0 else 0.0
         }
 
     def draw_grid_and_score(self, canvas: np.ndarray, rows: int, cols: int,
@@ -288,7 +266,7 @@ class PuzzleSolverBase:
 
         # Gold color for grid lines
         grid_color = (0, 215, 255)
-        grid_thickness = 2
+        grid_thickness = 4
 
         # Draw vertical lines
         for c in range(1, cols):
@@ -312,8 +290,8 @@ class PuzzleSolverBase:
 
         font = cv2.FONT_HERSHEY_SIMPLEX
 
-        # Calculate font_scale dynamically so text occupies approximately 50% of width
-        target_width = w * 0.5
+        # Calculate font_scale dynamically so text occupies approximately 30% of width
+        target_width = w * 0.3
         font_scale = 1.0
         font_thickness = 2
 
@@ -351,48 +329,59 @@ class PuzzleSolverBase:
 
         return result
 
-    def save_results(self, grid, rows, cols):
-        # Create specific folder for this image and number of slices
-        num_slices = len(self.slices)
-        image_folder = f"{self.image_name}_{num_slices}slices" if self.image_name else f"imagen_{num_slices}slices"
-        specific_output_dir = os.path.join(self.output_dir, image_folder)
-        os.makedirs(specific_output_dir, exist_ok=True)
-
-        h, w = self.slices[0].image.shape[:2]
-        canvas = np.zeros((h * rows, w * cols, 3), dtype=np.uint8)
-
-        # Generate simpler filenames since they're in specific folder
-        method_name = self.__class__.__name__.replace('Solver', '').lower()
-
-        map_filename = os.path.join(specific_output_dir, f"{method_name}_reconstruction_map.txt")
-        img_filename = os.path.join(specific_output_dir, f"{method_name}_reconstructed.png")
-
-        # Build canvas and calculate accuracy
-        with open(map_filename, 'w') as f:
-            f.write(f"Reconstruction map for: {self.image_name or 'image'}\n")
-            f.write(f"Method used: {method_name.upper()}\n")
-            f.write(f"Total number of slices: {num_slices}\n")
-            f.write(f"Dimensions: {rows}x{cols} slices\n")
-            f.write(f"Generated by: {self.__class__.__name__}\n")
-            f.write("-" * 50 + "\n")
-            f.write("POSITION | ORIGINAL FILE\n")
-            f.write("-" * 30 + "\n")
-
+    def save_reconstruction_map(self, grid, rows: int, cols: int, out_dir: str, method_name: str):
+        """Save reconstruction map to text file."""
+        map_filename = f"{method_name}_reconstruction_map.txt"
+        map_path = os.path.join(out_dir, map_filename)
+        
+        with open(map_path, 'w') as f:
+            f.write("Reconstruction Map\n")
+            f.write("=" * 80 + "\n\n")
+            f.write(f"Method: {method_name}\n")
+            f.write(f"Grid size: {rows}x{cols}\n\n")
+            f.write("Position Mapping:\n")
+            f.write("-" * 80 + "\n")
+            f.write(f"{'Position':<15} | {'Filename':<30} | {'Original Pos'}\n")
+            f.write("-" * 80 + "\n")
+            
+            solution_map = self.load_solution_mapping()
+            
             for r in range(rows):
                 for c in range(cols):
-                    slc = grid[r][c]
-                    f.write(f"({r},{c}) -> {slc.filename}\n")
-                    canvas[r*h:(r+1)*h, c*w:(c+1)*w] = slc.image
-
-        # Calculate accuracy metrics
-        accuracy_metrics = self.calculate_accuracy(grid, rows, cols)
-
-        # Draw grid and score on image
-        canvas_with_overlay = self.draw_grid_and_score(canvas, rows, cols, accuracy_metrics)
-
-        # Save image with overlay
-        cv2.imwrite(img_filename, canvas_with_overlay)
-
-        # Print only save confirmation
-        print(f"✓ Image saved: {img_filename}")
+                    piece = grid[r][c]
+                    position_str = f"({r},{c})"
+                    
+                    # Get original position if available
+                    if piece.filename in solution_map:
+                        orig_r, orig_c = solution_map[piece.filename]
+                        orig_pos_str = f"({orig_r},{orig_c})"
+                    else:
+                        orig_pos_str = "Unknown"
+                    
+                    f.write(f"{position_str:<15} | {piece.filename:<30} | {orig_pos_str}\n")
+            
+            f.write("\n")
+        
         print(f"✓ Map saved: {map_filename}")
+
+    def save_results(self, grid, rows, cols):
+        num_slices = len(self.slices)
+        out_dir = os.path.join(self.output_dir, f"{self.image_name}_{num_slices}slices")
+        os.makedirs(out_dir, exist_ok=True)
+        
+        h, w = self.slices[0].original_image.shape[:2]
+        canvas = np.zeros((h * rows, w * cols, 3), dtype=np.uint8)
+        for r in range(rows):
+            for c in range(cols):
+                canvas[r*h:(r+1)*h, c*w:(c+1)*w] = grid[r][c].original_image
+        
+        metrics = self.calculate_accuracy(grid, rows, cols)
+        final_img = self.draw_grid_and_score(canvas, rows, cols, metrics)
+        
+        method_name = self.__class__.__name__.lower().replace('solver','')
+        filename = f"{method_name}_reconstructed.png"
+        cv2.imwrite(os.path.join(out_dir, filename), final_img)
+        print(f"✓ Saved: {filename} | Borders: {metrics['border_accuracy_percent']:.1f}%")
+        
+        # Save reconstruction map
+        self.save_reconstruction_map(grid, rows, cols, out_dir, method_name)

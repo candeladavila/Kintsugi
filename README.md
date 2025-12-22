@@ -14,6 +14,11 @@ An intelligent image puzzle system that divides images into randomized pieces an
   - **Gradient Analysis**: Uses edge detection and gradient matching for intelligent piece placement
   - **Color Analysis**: Employs LAB color space for perceptually accurate edge matching
   - **Random Assembly**: Baseline comparison using random piece arrangement
+- **Advanced Reconstruction Engine**:
+  - **Connection Graph**: Builds a complete weighted graph of all possible piece connections
+  - **Greedy Selection**: Globally optimal edge selection using min-heap priority queue
+  - **Union-Find**: Efficient cycle prevention and component tracking
+  - **Backtracking**: Spatial layout optimization with BFS traversal
 - **Benchmarking Suite**: Comprehensive performance evaluation across multiple puzzle sizes and datasets
 - **Border Analysis Tools**: Visualize and compare edge compatibility between puzzle pieces
 - **Clean Grid Generation**: Create visualization-ready puzzle reconstructions without metrics
@@ -28,7 +33,10 @@ An intelligent image puzzle system that divides images into randomized pieces an
 
 ```bash
 # Install required dependencies
-pip install opencv-python numpy
+pip install -r requirements.txt
+
+# Or manually:
+pip install opencv-python numpy networkx
 ```
 
 ### Basic Usage
@@ -108,46 +116,73 @@ solver = ColorSolver("sliced_images/example_16slices",
 
 ```
 Kintsugi/
-├── main.py                              # Main orchestrator script
-├── slice_images.py                      # Image slicing V1 (no rotation)
-├── slice_images_v2.py                   # Image slicing V2 (with rotation)
-├── puzzle_solver.py                     # Unified reconstruction interface
-├── benchmark_puzzle_v1_v2_multi_grids.py # Comprehensive benchmarking tool
-├── compare_slice_borders.py             # Visual border comparison tool
-├── analyze_border_slice_6_vs_7.py       # Border analysis for specific slices
-├── generate_clean_grid.py               # Clean grid generation V1
-├── generate_clean_grid_v2.py            # Clean grid generation V2
-├── extract_borders.py                   # Border extraction utility
-├── puzzle_reconstructor/                # V1 Reconstruction algorithms
+├── main.py                                    # Main orchestrator script
+├── slice_images.py                            # Image slicing V1 (no rotation)
+├── slice_images_v2.py                         # Image slicing V2 (with rotation)
+├── puzzle_solver.py                           # Unified reconstruction interface
+├── benchmark_puzzle_v1_v2_multi_grids.py      # Comprehensive benchmarking tool
+├── analyze_border_comparison_color.py         # Color-based border analysis
+├── analyze_border_comparison_gradient.py      # Gradient-based border analysis
+├── analyze_border_comparison_paikin.py        # Paikin-based border analysis
+├── analyze_border_slice_6_vs_7.py             # Border analysis for specific slices
+├── generate_clean_grid.py                     # Clean grid generation V1
+├── generate_clean_grid_v2.py                  # Clean grid generation V2
+├── extract_borders.py                         # Border extraction utility
+├── requirements.txt                           # Project dependencies
+├── puzzle_reconstructor/                      # V1 Reconstruction algorithms
 │   ├── __init__.py
-│   ├── puzzle_base.py                   # Base class for V1 solvers
-│   ├── gradient_reconstructor.py        # Gradient-based reconstruction
-│   ├── color_reconstructor.py           # Color-based reconstruction
-│   ├── paikin_reconstructor.py          # Paikin Best Buddies algorithm
-│   └── random_reconstructor.py          # Random baseline reconstruction
-├── puzzle_reconstructor_v2/             # V2 Reconstruction (with rotation)
+│   ├── puzzle_base.py                         # Base class with connection graph + backtracking
+│   ├── gradient_reconstructor.py              # Gradient-based reconstruction
+│   ├── color_reconstructor.py                 # Color-based reconstruction
+│   ├── paikin_reconstructor.py                # Paikin Best Buddies algorithm
+│   └── random_reconstructor.py                # Random baseline reconstruction
+├── puzzle_reconstructor_v2/                   # V2 Reconstruction (with rotation)
 │   ├── __init__.py
-│   ├── puzzle_base_v2.py                # Base class for V2 solvers
-│   ├── gradient_reconstructor_v2.py     # Gradient with rotation support
-│   ├── color_reconstructor_v2.py        # Color with rotation support
-│   ├── paikin_reconstructor_v2.py       # Paikin with rotation support
-│   └── random_reconstructor_v2.py       # Random with rotation support
-├── images/                              # Input images directory
-├── sliced_images_v1/                    # V1 puzzle pieces (no rotation)
+│   ├── puzzle_base_v2.py                      # Base class with rotation support
+│   ├── gradient_reconstructor_v2.py           # Gradient with rotation support
+│   ├── color_reconstructor_v2.py              # Color with rotation support
+│   ├── paikin_reconstructor_v2.py             # Paikin with rotation support
+│   └── random_reconstructor_v2.py             # Random with rotation support
+├── images/                                    # Input images directory
+├── datasets/                                  # Dataset directory (e.g., CIFAR-10)
+├── sliced_images_v1/                          # V1 puzzle pieces (no rotation)
 │   └── [imagename]_[N]slices/
-├── sliced_images_v2/                    # V2 puzzle pieces (with rotation)
+│       ├── [imagename]_slice_000.png
+│       ├── [imagename]_slice_001.png
+│       ├── ...
+│       └── [imagename]_order.txt              # Solution mapping
+├── sliced_images_v2/                          # V2 puzzle pieces (with rotation)
 │   └── [imagename]_[N]slices/
-├── output_images/                       # Reconstructed results
-│   ├── ver_1/                           # V1 reconstructions
-│   ├── ver_2/                           # V2 reconstructions
-│   ├── ver_1_clean_grid/                # Clean V1 visualizations
-│   └── ver_2_clean_grid/                # Clean V2 visualizations
-├── benchmark_output/                    # Benchmark results
-│   ├── v1/                              # V1 benchmark data
-│   ├── v2/                              # V2 benchmark data
-│   ├── benchmark_summary.json           # JSON summary
-│   └── benchmark_summary.csv            # CSV summary
-└── border_analysis_output/              # Border comparison visualizations
+│       ├── [imagename]_slice_000.png          # Fixed anchor (top-left, no rotation)
+│       ├── [imagename]_slice_001.png
+│       ├── ...
+│       └── [imagename]_order.txt              # Solution mapping with rotations
+├── output_images/                             # Reconstructed results
+│   ├── ver_1/                                 # V1 reconstructions
+│   │   └── [imagename]_[N]slices/
+│   │       ├── paikin_reconstructed.png
+│   │       ├── paikin_reconstruction_map.txt
+│   │       ├── gradient_reconstructed.png
+│   │       ├── gradient_reconstruction_map.txt
+│   │       ├── color_reconstructed.png
+│   │       ├── color_reconstruction_map.txt
+│   │       ├── random_reconstructed.png
+│   │       └── random_reconstruction_map.txt
+│   └── ver_2/                                 # V2 reconstructions
+│       └── [imagename]_[N]slices/
+│           ├── paikin_v2_reconstructed.png
+│           ├── paikin_v2_reconstruction_map.txt
+│           ├── gradient_v2_reconstructed.png
+│           ├── gradient_v2_reconstruction_map.txt
+│           ├── color_v2_reconstructed.png
+│           ├── color_v2_reconstruction_map.txt
+│           ├── random_v2_reconstructed.png
+│           └── random_v2_reconstruction_map.txt
+├── benchmark_output/                          # Benchmark results
+│   ├── results.json                           # Detailed results
+│   └── benchmark_summary.csv                  # CSV summary
+├── border_analysis_output/                    # Border comparison visualizations
+└── borders_[imagename]_slice_[N]/             # Extracted borders for analysis
 ```
 
 ## 🛠️ Components
@@ -201,19 +236,58 @@ Features:
 
 ## 📊 Algorithm Details
 
+### Connection Graph Reconstruction (Base Algorithm)
+
+All reconstruction methods use a unified connection graph approach:
+
+1. **Complete Graph Construction**: 
+   - Build weighted graph of ALL possible piece connections (O(n²) edges)
+   - Each edge represents compatibility between two piece borders
+   - Supports 4 connection types: right, bottom, left, top
+
+2. **Global Greedy Selection**:
+   - Use min-heap to process connections by descending compatibility score
+   - Select globally best connections (not just locally optimal)
+   - Union-Find data structure prevents cycles and tracks components
+
+3. **Edge Constraint Enforcement**:
+   - Maximum 4 edges per piece (one per side)
+   - No duplicate edges on the same piece side
+   - Connected graph formation ensures single component
+
+4. **Spatial Layout via BFS**:
+   - Convert connection graph to 2D spatial grid
+   - Breadth-first traversal from anchor piece
+   - Dynamic grid expansion to accommodate all pieces
+
+5. **Backtracking & Optimization**:
+   - If layout conflicts arise, backtrack to last valid state
+   - Reorder placement queue based on connectivity strength
+   - Ensures all pieces fit in rectangular grid
+
 ### Gradient Analysis Algorithm
 
 1. **Edge Detection**: Apply Sobel (3x3) filters to detect horizontal/vertical edges
-2. **Boundary Analysis**: Extract edge pixels along piece boundaries
-3. **Compatibility Scoring**: Calculate gradient similarity between potential neighbors
-4. **Optimization**: Use greedy placement with backtracking for optimal arrangement
+2. **Boundary Analysis**: Extract configurable-width borders (10-100px) along piece edges
+3. **Compatibility Scoring**: Calculate gradient continuity across junction using LAB color space
+4. **Quality Index**: Combine gradient differences (40%), color differences (40%), and smoothness metrics (20%)
+5. **Graph Integration**: Feed compatibility scores into connection graph for reconstruction
 
 ### Color Analysis Algorithm
 
 1. **Color Space Conversion**: Convert to LAB color space for perceptual accuracy
-2. **Edge Sampling**: Extract color values along piece boundaries
-3. **Distance Calculation**: Compute Euclidean distance in LAB space
-4. **Matching**: Find best color matches between piece edges
+2. **Edge Sampling**: Extract color values along configurable-width borders
+3. **Distance Calculation**: Compute Euclidean distance in LAB space between adjacent edges
+4. **Compatibility Scoring**: Lower distance = higher compatibility
+5. **Graph Integration**: Use color distances as edge weights in connection graph
+
+### Paikin Best Buddies Algorithm
+
+1. **Multi-Channel Features**: Combine LAB color (60%) and gradient magnitude (40%)
+2. **Best Buddies Criterion**: Pieces A and B are "best buddies" if each is the other's best match
+3. **Best-First Search**: Priority queue expansion starting from fixed anchor piece
+4. **Rotation Support (V2)**: Tests all 4 rotations (0°, 90°, 180°, 270°) per piece
+5. **Greedy Placement**: Places pieces one-by-one based on lowest compatibility cost to existing layout
 
 ## 📈 Performance
 
@@ -250,7 +324,10 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 3. **Install dependencies**:
 ```bash
-pip install opencv-python numpy
+pip install -r requirements.txt
+
+# Or manually:
+pip install opencv-python numpy networkx
 ```
 
 ## 📝 Usage Examples

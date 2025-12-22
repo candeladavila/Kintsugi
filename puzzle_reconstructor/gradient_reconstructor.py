@@ -200,8 +200,8 @@ class GradientSolver(PuzzleSolverBase):
         Returns:
             Quality index (lower = better match)
         """
-        img_a = self.slices[piece_a_idx].image
-        img_b = self.slices[piece_b_idx].image
+        img_a = self.slices[piece_a_idx].original_image
+        img_b = self.slices[piece_b_idx].original_image
         
         if relation == 'right':
             # A is left of B: compare right border of A with left border of B
@@ -402,7 +402,7 @@ class GradientSolver(PuzzleSolverBase):
         best_score = float('inf')
         
         for idx, slice_obj in enumerate(self.slices):
-            img = slice_obj.image
+            img = slice_obj.original_image
             
             # Extract top and left borders
             top_border = self.extract_border(img, 'top')

@@ -121,6 +121,7 @@ def run_puzzle_solver_v1(image_name, num_slices, method='all', border_width=100)
         for method_name, solver_class in methods_to_run:
             try:
                 print(f"\nExecuting method: {method_name.upper()}")
+                print(f"Algorithm: Global Affinity Graph + Backtracking")
                 print(f"Border width: {border_width}px")
                 solver = solver_class(sliced_dir, output_dir, image_name, border_width)
                 solver.load_slices(image_name)
@@ -203,6 +204,7 @@ def run_puzzle_solver_v2(image_name, num_slices, method='all', border_width=100)
         for method_name, solver_class in methods_to_run:
             try:
                 print(f"\nExecuting method: {method_name.upper()} V2")
+                print(f"Algorithm: Rotation-Aware Global Graph + Recursive Backtracking")
                 print(f"Border width: {border_width}px")
                 solver = solver_class(sliced_dir, output_dir, image_name, border_width)
                 solver.load_slices(image_name)
@@ -294,7 +296,7 @@ def interactive_mode(version=1):
         version_str = "V1 (Standard)" if version == 1 else "V2 (With Rotation)"
     print(f"KINTSUGI - IMAGE PUZZLE SYSTEM - {version_str}")
     print("=" * 60)
-    print("Splits an image into pieces and attempts automatic reconstruction")
+    print("Graph-based reconstruction with backtracking and MST guidance")
     print("")
     
     # Get image path (without listing)
@@ -322,10 +324,10 @@ def interactive_mode(version=1):
     
     # Select reconstruction method
     methods = {
-        '1': ('paikin', 'Paikin (Best Buddies)'),
-        '2': ('gradient', 'Gradient Analysis'),
-        '3': ('color', 'Color Analysis'),
-        '4': ('random', 'Random Order'),
+        '1': ('paikin', 'Paikin Solver (Global Graph Analysis)'),
+        '2': ('gradient', 'Gradient Solver (Structural Borders)'),
+        '3': ('color', 'Color Solver (Chromatographic Borders)'),
+        '4': ('random', 'Random Placement (Baseline)'),
         '5': ('all', 'All Methods')
     }
     
@@ -348,7 +350,7 @@ def interactive_mode(version=1):
     # Configure border_width
     print("\nBorder width configuration:")
     print("  Border width determines how many pixels from edges are analyzed")
-    print("  Default: 100 pixels (recommended for most cases)")
+    print("  Default: 100 pixels (recommended for high-resolution images)")
     
     while True:
         border_input = input("\nUse default (100px)? (Enter for yes, or type a value): ").strip()
@@ -424,14 +426,14 @@ def main():
         version_str = "V1 (Standard)" if version == 1 else "V2 (With Rotation)"
         output_folder = "output_images/ver_1" if version == 1 else "output_images/ver_2"
     
-    sliced_folder = "sliced_images"
-    
     print(f"\nConfiguration:")
     print(f"   Version: {version_str}")
     print(f"   Image: {image_path}")
     print(f"   Base name: {image_name}")
     print(f"   Pieces: {num_slices}")
     print(f"   Method: {method.upper()}")
+    print(f"   Backtracking: Enabled")
+    print(f"   MST Guidance: Enabled")
     print("")
     
     # Confirm before proceeding
@@ -511,8 +513,8 @@ def main():
         print(f"Pieces saved in: sliced_images_v2/{image_name}_{num_slices}slices/")
     print(f"Results in: {output_folder}/{image_name}_{num_slices}slices/")
     if version == 2:
-        print("Note: V2 includes rotation accuracy metrics")
-    print("\nCheck the results and compare the different methods!")
+        print("Note: V2 includes rotation and relative connection accuracy metrics")
+    print("\nCheck the results and analyze the graph-based reconstruction performance!")
 
 if __name__ == "__main__":
     try:
